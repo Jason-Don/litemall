@@ -23,8 +23,8 @@ export default {
       this.chartSettings = {
         labelMap: {
           'orders': '订单量',
-          'products': '下单货品数量',
-          'amount': '下单货品总额'
+          'products': '下单课程数量',
+          'amount': '下单课程总额'
         }
       }
       this.chartExtend = {

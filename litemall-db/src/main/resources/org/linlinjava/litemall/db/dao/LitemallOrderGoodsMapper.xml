@@ -133,6 +133,13 @@
     id, order_id, goods_id, goods_name, goods_sn, product_id, `number`, price, specifications, 
     pic_url, `comment`, add_time, update_time, deleted
   </sql>
+  <sql id="GoodsStatus_Column_List">
+    (
+    select case when starttime > CURRENT_DATE() then '未开课'
+    when starttime &lt;= CURRENT_DATE() and endtime >= CURRENT_DATE() then '开课中'
+    else '已结课' end from litemall_goods g where goods_id = g.id
+    ) status
+  </sql>
   <select id="selectByExample" parameterType="org.linlinjava.litemall.db.domain.LitemallOrderGoodsExample" resultMap="BaseResultMap">
     <!--
       WARNING - @mbg.generated
@@ -142,7 +149,8 @@
     <if test="distinct">
       distinct
     </if>
-    <include refid="Base_Column_List" />
+    <include refid="Base_Column_List" />,
+    <include refid="GoodsStatus_Column_List" />
     from litemall_order_goods
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

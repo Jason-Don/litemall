@@ -7,10 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.notify.NotifyService;
 import org.linlinjava.litemall.core.notify.NotifyType;
-import org.linlinjava.litemall.core.util.CharUtil;
-import org.linlinjava.litemall.core.util.JacksonUtil;
-import org.linlinjava.litemall.core.util.RegexUtil;
-import org.linlinjava.litemall.core.util.ResponseUtil;
+import org.linlinjava.litemall.core.util.*;
 import org.linlinjava.litemall.core.util.bcrypt.BCryptPasswordEncoder;
 import org.linlinjava.litemall.db.domain.LitemallUser;
 import org.linlinjava.litemall.db.service.CouponAssignService;
@@ -21,7 +18,6 @@ import org.linlinjava.litemall.wx.dto.UserToken;
 import org.linlinjava.litemall.wx.dto.WxLoginInfo;
 import org.linlinjava.litemall.wx.service.CaptchaCodeManager;
 import org.linlinjava.litemall.wx.service.UserTokenManager;
-import org.linlinjava.litemall.core.util.IpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -29,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +127,7 @@ public class WxAuthController {
         }
 
         LitemallUser user = userService.queryByOid(openId);
+        boolean updateUserInfo = false;
         if (user == null) {
             user = new LitemallUser();
             user.setUsername(openId);
@@ -155,6 +153,13 @@ public class WxAuthController {
             if (userService.updateById(user) == 0) {
                 return ResponseUtil.updatedDataFailed();
             }
+
+            if(user.getName() == null || user.getSchool() == null || user.getGrade() == null
+//                    ||user.getName().isEmpty() || user.getSchool().isEmpty() || user.getGrade().isEmpty()
+                    || user.getGender()==0 || user.getBirthday() == null || user.getMobile() == null) {
+                //个人信息不完整
+                updateUserInfo = true;
+            }
         }
 
         // token
@@ -163,6 +168,7 @@ public class WxAuthController {
         Map<Object, Object> result = new HashMap<Object, Object>();
         result.put("token", token);
         result.put("userInfo", userInfo);
+        result.put("updateUserInfo", updateUserInfo);
         return ResponseUtil.ok(result);
     }
 
@@ -231,11 +237,11 @@ public class WxAuthController {
         String username = JacksonUtil.parseString(body, "username");
         String password = JacksonUtil.parseString(body, "password");
         String mobile = JacksonUtil.parseString(body, "mobile");
-        String code = JacksonUtil.parseString(body, "code");
+//        String code = JacksonUtil.parseString(body, "code");
         String wxCode = JacksonUtil.parseString(body, "wxCode");
 
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password) || StringUtils.isEmpty(mobile)
-                || StringUtils.isEmpty(wxCode) || StringUtils.isEmpty(code)) {
+                || StringUtils.isEmpty(wxCode) /*|| StringUtils.isEmpty(code)*/) {
             return ResponseUtil.badArgument();
         }
 
@@ -252,10 +258,10 @@ public class WxAuthController {
             return ResponseUtil.fail(AUTH_INVALID_MOBILE, "手机号格式不正确");
         }
         //判断验证码是否正确
-        String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
-        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code)) {
-            return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
-        }
+//        String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
+//        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code)) {
+//            return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
+//        }
 
         String openId = null;
         try {
@@ -312,7 +318,102 @@ public class WxAuthController {
         return ResponseUtil.ok(result);
     }
 
+    @PostMapping("saveUserInfo")
+    public Object saveUserInfo(@RequestBody String body, HttpServletRequest request) {
+        String name = JacksonUtil.parseString(body, "name");
+        String school = JacksonUtil.parseString(body, "school");
+        String grade = JacksonUtil.parseString(body, "grade");
+        String birthday = JacksonUtil.parseString(body, "birthday");
+        String gender = JacksonUtil.parseString(body, "gender");
+        String mobile = JacksonUtil.parseString(body, "mobile");
+        String wxCode = JacksonUtil.parseString(body, "wxCode");
 
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(school)
+                || StringUtils.isEmpty(grade) || StringUtils.isEmpty(birthday)
+                || gender == "0" || StringUtils.isEmpty(mobile)
+                || StringUtils.isEmpty(wxCode) /*|| StringUtils.isEmpty(code)*/) {
+            return ResponseUtil.badArgument();
+        }
+
+        List<LitemallUser> userList =new ArrayList<>(16);
+
+
+//        userList = userService.queryByMobile(mobile);
+//        if (userList.size() > 0) {
+//            return ResponseUtil.fail(AUTH_MOBILE_REGISTERED, "手机号已注册");
+//        }
+        if (!RegexUtil.isMobileExact(mobile)) {
+            return ResponseUtil.fail(AUTH_INVALID_MOBILE, "手机号格式不正确");
+        }
+
+        String openId = null;
+        try {
+            WxMaJscode2SessionResult result = this.wxService.getUserService().getSessionInfo(wxCode);
+            openId = result.getOpenid();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, "openid 获取失败");
+        }
+        userList = userService.queryByOpenid(openId);
+        if (userList.size() == 0) {
+            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, "openid 未注册");
+        }
+        if (userList.size() == 1) {
+            LitemallUser checkUser = userList.get(0);
+            LitemallUser updateUser = new LitemallUser();
+            updateUser.setId(checkUser.getId());
+            updateUser.setName(name);
+            updateUser.setSchool(school);
+            updateUser.setGrade(grade);
+            updateUser.setBirthday(DateTimeUtil.stringDisplayLocalDate(birthday));
+            updateUser.setGender(Byte.parseByte(gender));
+            updateUser.setMobile(mobile);
+
+            userService.updateById(updateUser);
+
+            // userInfo
+            UserInfo userInfo = new UserInfo();
+            userInfo.setNickName(checkUser.getNickname());
+            userInfo.setAvatarUrl(checkUser.getAvatar());
+            // token
+            String token = UserTokenManager.generateToken(checkUser.getId());
+
+            Map<Object, Object> result = new HashMap<Object, Object>();
+            result.put("token", token);
+            result.put("userInfo", userInfo);
+            return ResponseUtil.ok(result);
+        }
+        return ResponseUtil.fail();
+    }
+
+    @PostMapping("getUserInfo")
+    public Object getUserInfo(@RequestBody String body, HttpServletRequest request) {
+        String wxCode = JacksonUtil.parseString(body, "wxCode");
+
+        if ( StringUtils.isEmpty(wxCode)) {
+            return ResponseUtil.badArgument();
+        }
+
+        List<LitemallUser> userList =new ArrayList<>(16);
+
+        String openId = null;
+        try {
+            WxMaJscode2SessionResult result = this.wxService.getUserService().getSessionInfo(wxCode);
+            openId = result.getOpenid();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, "openid 获取失败");
+        }
+        userList = userService.queryByOpenid(openId);
+        if (userList.size() == 0) {
+            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, "openid 未注册");
+        }
+        if (userList.size() == 1) {
+            LitemallUser user = userList.get(0);
+            return ResponseUtil.ok(user);
+        }
+        return ResponseUtil.fail();
+    }
     /**
      * 请求验证码
      *

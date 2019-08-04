@@ -3,10 +3,8 @@ package org.linlinjava.litemall.admin.web;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.db.service.LitemallGoodsProductService;
-import org.linlinjava.litemall.db.service.LitemallGoodsService;
-import org.linlinjava.litemall.db.service.LitemallOrderService;
-import org.linlinjava.litemall.db.service.LitemallUserService;
+import org.linlinjava.litemall.db.domain.LitemallBrand;
+import org.linlinjava.litemall.db.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,18 +27,22 @@ public class AdminDashbordController {
     @Autowired
     private LitemallGoodsProductService productService;
     @Autowired
+    private LitemallBrandService brandService;
+    @Autowired
     private LitemallOrderService orderService;
 
     @GetMapping("")
     public Object info() {
         int userTotal = userService.count();
         int goodsTotal = goodsService.count();
-        int productTotal = productService.count();
+//        int productTotal = productService.count();
+        int brandTotal = brandService.count();
         int orderTotal = orderService.count();
         Map<String, Integer> data = new HashMap<>();
         data.put("userTotal", userTotal);
         data.put("goodsTotal", goodsTotal);
-        data.put("productTotal", productTotal);
+//        data.put("productTotal", productTotal);
+        data.put("brandTotal", brandTotal);
         data.put("orderTotal", orderTotal);
 
         return ResponseUtil.ok(data);

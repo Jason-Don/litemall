@@ -47,7 +47,13 @@
   color: #333;
   margin-top: 20rpx;
 }
-
+.a-goods-list {
+  width: 750rpx;
+  height: auto;
+  overflow: hidden;
+  background: #fff;
+  color: #333;
+}
 .a-section .h {
   display: flex;
   flex-flow: row nowrap;
@@ -534,7 +540,7 @@
 }
 
 .search .icon {
-  background: url(http://yanxuan.nosdn.127.net/hxm/yanxuan-wap/p/20161201/style/img/icon-normal/search2-2fb94833aa.png) center no-repeat;
+  background: url(https://yanxuan.nosdn.127.net/hxm/yanxuan-wap/p/20161201/style/img/icon-normal/search2-2fb94833aa.png) center no-repeat;
   background-size: 100%;
   width: 28rpx;
   height: 28rpx;
@@ -546,4 +552,38 @@
   color: #666;
   padding-left: 10rpx;
   font-size: 30rpx;
+}
+
+.nav {
+  position: relative;
+  z-index: 99;
+  display: flex;
+  border-bottom: 1rpx solid #f4f4f4;
+  background: #fff;
+}
+
+.nav-son {
+  display: flex;
+  flex: 1;
+  text-align: center;
+  height: 80rpx;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+}
+.border-left {
+  border-left: 1rpx solid #f4f4f4;
+}
+.border-right {
+  border-right: 1rpx solid #f4f4f4;
+}
+.content {
+  display: inline-block;
+  font-size: 30rpx;
+  color: #666;
+}
+.searchButton {
+  display: inline-block;
+  font-size: 30rpx;
+  color: rgb(28, 148, 247);
 }

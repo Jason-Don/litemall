@@ -1,15 +1,17 @@
 // 以下是业务服务器API地址
 // 本机开发时使用
-var WxApiRoot = 'http://localhost:8080/wx/';
+// var WxApiRoot = 'http://localhost:80/wx/';
 // 局域网测试使用
-// var WxApiRoot = 'http://192.168.0.101:8080/wx/';
+// var WxApiRoot = 'http://192.168.1.117:8080/wx/';
+// var WxApiRoot = 'http://172.20.10.5:80/wx/';
 // 云平台部署时使用
-// var WxApiRoot = 'http://118.24.0.153:8080/wx/';
+// var WxApiRoot = 'http://47.105.214.224:80/wx/';
 // 云平台上线时使用
-// var WxApiRoot = 'https://www.menethil.com.cn/wx/';
+var WxApiRoot = 'https://www.123kt.net/wx/';
 
 module.exports = {
   IndexUrl: WxApiRoot + 'home/index', //首页数据接口
+  QueryGoodsList: WxApiRoot + 'home/queryGoodsList', //首页列表数据
   CatalogList: WxApiRoot + 'catalog/index', //分类目录全部分类数据接口
   CatalogCurrent: WxApiRoot + 'catalog/current', //分类目录当前分类数据接口
 
@@ -17,6 +19,9 @@ module.exports = {
   AuthLoginByAccount: WxApiRoot + 'auth/login', //账号登录
   AuthLogout: WxApiRoot + 'auth/logout', //账号登出
   AuthRegister: WxApiRoot + 'auth/register', //账号注册
+  AuthSaveUserInfo: WxApiRoot + 'auth/saveUserInfo', //保存用户信息
+  AuthGetUserInfo: WxApiRoot + 'auth/getUserInfo', //获取用户信息
+  
   AuthReset: WxApiRoot + 'auth/reset', //账号密码重置
   AuthRegisterCaptcha: WxApiRoot + 'auth/regCaptcha', //验证码
   AuthBindPhone: WxApiRoot + 'auth/bindPhone', //绑定微信手机号
@@ -96,5 +101,15 @@ module.exports = {
 
   UserIndex: WxApiRoot + 'user/index', //个人页面用户相关信息
   IssueList: WxApiRoot + 'issue/list', //帮助信息
+
+  ConfigMall: WxApiRoot + 'config/mall',//机构信息
+
+  VIPList: WxApiRoot + 'vip/listAll',//会员列表
+  GetVipById: WxApiRoot + 'vip/getVipById',//会员信息
+  VipOrderSubmit: WxApiRoot + 'vip/vipOrderSubmit',//会员下单
+  VipOrderList: WxApiRoot + 'vip/vipOrderList',//会员订单列表
+  VipOrderDetail: WxApiRoot + 'vip/vipOrderDetail',//会员订单详情
+  VipOrderCancel: WxApiRoot + 'vip/vipOrderCancel',//会员订单取消
+  VipOrderDelete: WxApiRoot + 'vip/vipOrderDelete',//会员订单删除
 
 };

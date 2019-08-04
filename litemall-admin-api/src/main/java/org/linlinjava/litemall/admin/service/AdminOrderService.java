@@ -51,14 +51,16 @@ public class AdminOrderService {
     @Autowired
     private LogHelper logHelper;
 
-    public Object list(Integer userId, String orderSn, List<Short> orderStatusArray,
+    public Object list(Integer userId, String orderSn, List<Short> orderStatusArray, String payType,
                        Integer page, Integer limit, String sort, String order) {
-        List<LitemallOrder> orderList = orderService.querySelective(userId, orderSn, orderStatusArray, page, limit, sort, order);
+        List<LitemallOrder> orderList = orderService.querySelective(userId, orderSn, orderStatusArray, payType, page, limit, sort, order);
         return ResponseUtil.okList(orderList);
     }
 
     public Object detail(Integer id) {
         LitemallOrder order = orderService.findById(id);
+        Map<String, Object> orderVo = new HashMap<String, Object>();
+
         List<LitemallOrderGoods> orderGoods = orderGoodsService.queryByOid(id);
         UserVo user = userService.findUserVoById(order.getUserId());
         Map<String, Object> data = new HashMap<>();
@@ -205,6 +207,49 @@ public class AdminOrderService {
         return ResponseUtil.ok();
     }
 
+    /**
+     * 确认付款
+     * 1. 检测当前订单是否确认付款
+     * 2. 设置订单状态
+     *
+     * @param body  订单信息，{ orderId：xxx, actualPrice：xxx }
+     * @return 订单操作结果
+     * 成功则 { errno: 0, errmsg: '成功' }
+     * 失败则 { errno: XXX, errmsg: XXX }
+     */
+    public Object pay(String body) {
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        Integer actualPrice = JacksonUtil.parseInteger(body, "actualPrice");
+
+        if (orderId == null) {
+            return ResponseUtil.badArgument();
+        }
+
+        LitemallOrder order = orderService.findById(orderId);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
+
+        // 如果订单是已取消状态，则不能确认付款
+        if (order.getOrderStatus().equals(OrderUtil.STATUS_CANCEL) || order.getOrderStatus().equals(OrderUtil.STATUS_AUTO_CANCEL)) {
+            return ResponseUtil.fail(ORDER_CONFIRM_NOT_ALLOWED, "订单不能确认付款");
+        }
+
+        order.setOrderStatus(OrderUtil.STATUS_PAY);
+        order.setActualPrice(new BigDecimal(actualPrice));
+        order.setPayTime(LocalDateTime.now());
+        if (orderService.updateWithOptimisticLocker(order) == 0) {
+            return ResponseUtil.updatedDateExpired();
+        }
+
+        //TODO 发送邮件和短信通知，这里采用异步发送
+        // 发货会发送通知短信给用户:          *
+        // "您的订单已经发货，快递公司 {1}，快递单 {2} ，请注意查收"
+//        notifyService.notifySmsTemplate(order.getMobile(), NotifyType.SHIP, new String[]{shipChannel, shipSn});
+
+        logHelper.logOrderSucceed("确认付款", "订单编号 " + orderId);
+        return ResponseUtil.ok();
+    }
 
     /**
      * 回复订单商品

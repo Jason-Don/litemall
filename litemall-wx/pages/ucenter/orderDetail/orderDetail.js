@@ -6,7 +6,7 @@ Page({
     orderId: 0,
     orderInfo: {},
     orderGoods: [],
-    expressInfo: {},
+    // expressInfo: {},
     flag: false,
     handleOption: {}
   },
@@ -48,7 +48,7 @@ Page({
           orderInfo: res.data.orderInfo,
           orderGoods: res.data.orderGoods,
           handleOption: res.data.orderInfo.handleOption,
-          expressInfo: res.data.expressInfo
+          // expressInfo: res.data.expressInfo
         });
       }
 
@@ -201,5 +201,10 @@ Page({
   },
   onUnload: function() {
     // 页面关闭
+  },
+  goodsDetail(e){
+    wx.navigateTo({
+      url: "/pages/goods/goods?operate=0&id="+e.currentTarget.dataset.goodsid
+    });
   }
 })

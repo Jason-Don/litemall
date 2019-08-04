@@ -2,20 +2,23 @@ package org.linlinjava.litemall.db.service;
 
 import com.github.pagehelper.PageHelper;
 import org.linlinjava.litemall.db.dao.LitemallUserMapper;
-import org.linlinjava.litemall.db.domain.LitemallUser;
-import org.linlinjava.litemall.db.domain.LitemallUserExample;
-import org.linlinjava.litemall.db.domain.UserVo;
+import org.linlinjava.litemall.db.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class LitemallUserService {
     @Resource
     private LitemallUserMapper userMapper;
+    @Resource
+    private LitemallOrderGoodsService litemallOrderGoodsService;
+    @Resource
+    private LitemallOrderService litemallOrderService;
 
     public LitemallUser findById(Integer userId) {
         return userMapper.selectByPrimaryKey(userId);
@@ -26,6 +29,7 @@ public class LitemallUserService {
         UserVo userVo = new UserVo();
         userVo.setNickname(user.getNickname());
         userVo.setAvatar(user.getAvatar());
+        userVo.setName(user.getName());
         return userVo;
     }
 
@@ -46,9 +50,31 @@ public class LitemallUserService {
         return userMapper.updateByPrimaryKeySelective(user);
     }
 
-    public List<LitemallUser> querySelective(String username, String mobile, Integer page, Integer size, String sort, String order) {
+    public List<LitemallUser> querySelective(String username, String mobile,Integer goodsId, Integer page, Integer size, String sort, String order) {
         LitemallUserExample example = new LitemallUserExample();
         LitemallUserExample.Criteria criteria = example.createCriteria();
+
+        if (!StringUtils.isEmpty(goodsId)) {
+            //goodsId不为空，查找购买此goodsId课程的用户
+            List<LitemallOrderGoods> orderGoodsList = litemallOrderGoodsService.findByGid(goodsId);
+
+            if(orderGoodsList.size()>0){
+                List<Integer> orderIdList = new ArrayList<>(16);
+                orderGoodsList.forEach(orderGoods ->{ orderIdList.add(orderGoods.getOrderId()); });
+
+                List<LitemallOrder> payOrderList = litemallOrderService.findByIds_PayOrder(orderIdList);
+                if(payOrderList.size()>0){
+                    List<Integer> userIdList = new ArrayList<>(16);
+                    payOrderList.forEach(payOrder ->{ userIdList.add(payOrder.getUserId()); });
+                    criteria.andIdIn(userIdList);
+                }else{
+                    //用户下单 但没有付款成功的
+                    return new ArrayList<>();
+                }
+            }else{
+                //没有用户下单
+                return new ArrayList<>();            }
+        }
 
         if (!StringUtils.isEmpty(username)) {
             criteria.andUsernameLike("%" + username + "%");

@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
 
+
     <!-- 查询和其他操作 -->
     <div class="filter-container">
       <el-input v-model="listQuery.username" clearable class="filter-item" style="width: 200px;" placeholder="请输入用户名"/>
@@ -9,33 +10,47 @@
       <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">导出</el-button>
     </div>
 
+    <el-tag v-if="goodsName!=null" size="medium" type="warning">购买课程名称：{{goodsName}}</el-tag>
+
     <!-- 查询结果 -->
     <el-table v-loading="listLoading" :data="list" element-loading-text="正在查询中。。。" border fit highlight-current-row>
-      <el-table-column align="center" width="100px" label="用户ID" prop="id" sortable/>
+        <el-table-column align="center" width="100px" label="用户ID" prop="id" sortable/>
 
-      <el-table-column align="center" label="用户名" prop="username"/>
+        <el-table-column align="center" label="学生姓名" prop="name"/>
+        <el-table-column align="center" label="学校" prop="school"/>
+        <el-table-column align="center" label="年级" prop="grade"/>
 
       <el-table-column align="center" label="手机号码" prop="mobile"/>
 
-      <el-table-column align="center" label="性别" prop="gender">
+        <el-table-column align="center" label="性别" prop="gender">
+          <template slot-scope="scope">
+            <el-tag >{{ genderDic[scope.row.gender] }}</el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column align="center" label="生日" prop="birthday"/>
+
+        <!--<el-table-column align="center" label="用户等级" prop="userLevel">-->
+          <!--<template slot-scope="scope">-->
+            <!--<el-tag >{{ levelDic[scope.row.userLevel] }}</el-tag>-->
+          <!--</template>-->
+        <!--</el-table-column>-->
+
+
+      <el-table-column align="center" label="会员等级" prop="vipName">
         <template slot-scope="scope">
-          <el-tag >{{ genderDic[scope.row.gender] }}</el-tag>
+          <el-tag :type="scope.row.vipName == null ? 'error' : 'success' ">{{ scope.row.vipName == null ? '普通会员': scope.row.vipName}}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="生日" prop="birthday"/>
 
-      <el-table-column align="center" label="用户等级" prop="userLevel">
-        <template slot-scope="scope">
-          <el-tag >{{ levelDic[scope.row.userLevel] }}</el-tag>
-        </template>
-      </el-table-column>
+      <el-table-column align="center" label="余额" prop="balance"/>
 
-      <el-table-column align="center" label="状态" prop="status">
-        <template slot-scope="scope">
-          <el-tag>{{ statusDic[scope.row.status] }}</el-tag>
-        </template>
-      </el-table-column>
+        <el-table-column align="center" label="状态" prop="status">
+          <template slot-scope="scope">
+            <el-tag>{{ statusDic[scope.row.status] }}</el-tag>
+          </template>
+        </el-table-column>
 
     </el-table>
 
@@ -53,10 +68,12 @@ export default {
   components: { Pagination },
   data() {
     return {
+      goodsName : null,
       list: null,
       total: 0,
       listLoading: true,
       listQuery: {
+        goodsId: undefined,
         page: 1,
         limit: 20,
         username: undefined,
@@ -71,9 +88,16 @@ export default {
     }
   },
   created() {
+    this.init()
     this.getList()
   },
   methods: {
+    init: function() {
+      if (this.$route.query.id != null) {
+        this.listQuery.goodsId = this.$route.query.id,
+        this.goodsName = this.$route.query.name
+      }
+    },
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
@@ -93,8 +117,8 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['用户名', '手机号码', '性别', '生日', '状态']
-        const filterVal = ['username', 'mobile', 'gender', 'birthday', 'status']
+        const tHeader = ['学生姓名',  '学校', '年级', '手机号码', '性别', '生日', '状态']
+        const filterVal = ['name', 'school', 'grade', 'mobile', 'gender', 'birthday', 'status']
         excel.export_json_to_excel2(tHeader, this.list, filterVal, '用户信息')
         this.downloadLoading = false
       })

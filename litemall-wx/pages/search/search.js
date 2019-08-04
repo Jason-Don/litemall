@@ -17,7 +17,7 @@ Page({
     defaultKeyword: {},
     hotKeyword: [],
     page: 1,
-    limit: 20,
+    limit: 10,
     categoryId: 0
   },
   //事件处理函数
@@ -93,7 +93,8 @@ Page({
   getGoodsList: function() {
     let that = this;
     util.request(api.GoodsList, {
-      keyword: that.data.keyword,
+      // keyword: that.data.keyword,
+      keyword:'',
       page: that.data.page,
       limit: that.data.limit,
       sort: that.data.currentSort,

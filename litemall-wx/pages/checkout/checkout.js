@@ -6,16 +6,16 @@ var app = getApp();
 Page({
   data: {
     checkedGoodsList: [],
-    checkedAddress: {},
+    // checkedAddress: {},
     availableCouponLength: 0, // 可用的优惠券数量
     goodsTotalPrice: 0.00, //商品总价
-    freightPrice: 0.00, //快递费
+    // freightPrice: 0.00, //快递费
     couponPrice: 0.00, //优惠券的价格
     grouponPrice: 0.00, //团购优惠价格
     orderTotalPrice: 0.00, //订单总价
     actualPrice: 0.00, //实际需要支付的总价
     cartId: 0,
-    addressId: 0,
+    // addressId: 0,
     couponId: 0,
     message: '',
     grouponLinkId: 0, //参与的团购，如果是发起则为0
@@ -30,22 +30,22 @@ Page({
     let that = this;
     util.request(api.CartCheckout, {
       cartId: that.data.cartId,
-      addressId: that.data.addressId,
+      // addressId: that.data.addressId,
       couponId: that.data.couponId,
       grouponRulesId: that.data.grouponRulesId
     }).then(function(res) {
       if (res.errno === 0) {
         that.setData({
           checkedGoodsList: res.data.checkedGoodsList,
-          checkedAddress: res.data.checkedAddress,
+          // checkedAddress: res.data.checkedAddress,
           availableCouponLength: res.data.availableCouponLength,
           actualPrice: res.data.actualPrice,
           couponPrice: res.data.couponPrice,
           grouponPrice: res.data.grouponPrice,
-          freightPrice: res.data.freightPrice,
+          // freightPrice: res.data.freightPrice,
           goodsTotalPrice: res.data.goodsTotalPrice,
           orderTotalPrice: res.data.orderTotalPrice,
-          addressId: res.data.addressId,
+          // addressId: res.data.addressId,
           couponId: res.data.couponId,
           grouponRulesId: res.data.grouponRulesId,
         });
@@ -122,69 +122,92 @@ Page({
     // 页面关闭
 
   },
-  submitOrder: function() {
-    if (this.data.addressId <= 0) {
-      util.showErrorToast('请选择收货地址');
-      return false;
-    }
-    util.request(api.OrderSubmit, {
-      cartId: this.data.cartId,
-      addressId: this.data.addressId,
-      couponId: this.data.couponId,
-      message: this.data.message,
-      grouponRulesId: this.data.grouponRulesId,
-      grouponLinkId: this.data.grouponLinkId
-    }, 'POST').then(res => {
-      if (res.errno === 0) {
-        
-        // 下单成功，重置couponId
-        try {
-          wx.setStorageSync('couponId', 0);
-        } catch (error) {
+  submitOrder: function(e) {
+    // if (this.data.addressId <= 0) {
+    //   util.showErrorToast('请选择收货地址');
+    //   return false;
+    // }
+      // util.showErrorToast(e.currentTarget.dataset.paytype);
+      // return false;
+    let that =this;
+    const payType = e.currentTarget.dataset.paytype
+    const orderId = '';
+
+    wx.showModal({
+      title: '',
+      content: '确定要下订单？',
+      success: function(res) {
+        if (res.confirm) {
+          
+          util.request(api.OrderSubmit, {
+            cartId: that.data.cartId,
+            addressId: that.data.addressId,
+            couponId: that.data.couponId,
+            message: that.data.message,
+            grouponRulesId: that.data.grouponRulesId,
+            grouponLinkId: that.data.grouponLinkId,
+            payType: payType
+          }, 'POST').then(res => {
+            if (res.errno === 0) {
+              // 下单成功，重置couponId
+              try {
+                wx.setStorageSync('couponId', 0);
+              } catch (error) {
+      
+              }
+              that.orderId = res.data.orderId;
+      
+              //线下支付
+              if(payType == 'offline'){
+                wx.redirectTo({
+                  url: '/pages/payResult/payResult?status=1&orderId=' + orderId + '&payType='+payType
+                });
+              }else{
+                util.request(api.OrderPrepay, {
+                  orderId: orderId
+                }, 'POST').then(function(res) {
+                  if (res.errno === 0) {
+                    const payParam = res.data;
+                    console.log("支付过程开始");
+                    wx.requestPayment({
+                      'timeStamp': payParam.timeStamp,
+                      'nonceStr': payParam.nonceStr,
+                      'package': payParam.packageValue,
+                      'signType': payParam.signType,
+                      'paySign': payParam.paySign,
+                      'success': function(res) {
+                        console.log("支付过程成功");
+                        wx.redirectTo({
+                          url: '/pages/payResult/payResult?status=1&orderId=' + orderId + '&payType='+payType
+                        });
+                      },
+                      'fail': function(res) {
+                        console.log("支付过程失败");
+                        wx.redirectTo({
+                          url: '/pages/payResult/payResult?status=0&orderId=' + orderId + '&payType='+payType
+                        });
+                      },
+                      'complete': function(res) {
+                        console.log("支付过程结束")
+                      }
+                    });
+                  } else {
+                    wx.redirectTo({
+                      url: '/pages/payResult/payResult?status=0&orderId=' + orderId + '&payType='+payType
+                    });
+                  }
+                });
+              }
+            } else {
+              wx.redirectTo({
+                url: '/pages/payResult/payResult?status=0&orderId=' + orderId + '&payType='+payType
+              });
+            }
+          });
 
         }
-
-        const orderId = res.data.orderId;
-        util.request(api.OrderPrepay, {
-          orderId: orderId
-        }, 'POST').then(function(res) {
-          if (res.errno === 0) {
-            const payParam = res.data;
-            console.log("支付过程开始");
-            wx.requestPayment({
-              'timeStamp': payParam.timeStamp,
-              'nonceStr': payParam.nonceStr,
-              'package': payParam.packageValue,
-              'signType': payParam.signType,
-              'paySign': payParam.paySign,
-              'success': function(res) {
-                console.log("支付过程成功");
-                wx.redirectTo({
-                  url: '/pages/payResult/payResult?status=1&orderId=' + orderId
-                });
-              },
-              'fail': function(res) {
-                console.log("支付过程失败");
-                wx.redirectTo({
-                  url: '/pages/payResult/payResult?status=0&orderId=' + orderId
-                });
-              },
-              'complete': function(res) {
-                console.log("支付过程结束")
-              }
-            });
-          } else {
-            wx.redirectTo({
-              url: '/pages/payResult/payResult?status=0&orderId=' + orderId
-            });
-          }
-        });
-
-      } else {
-        wx.redirectTo({
-          url: '/pages/payResult/payResult?status=0&orderId=' + orderId
-        });
       }
     });
+    
   }
 });

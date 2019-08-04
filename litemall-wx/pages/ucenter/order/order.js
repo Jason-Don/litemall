@@ -29,7 +29,7 @@ Page({
       limit: that.data.limit
     }).then(function(res) {
       if (res.errno === 0) {
-        console.log(res.data);
+        // console.log(res.data);
         that.setData({
           orderList: that.data.orderList.concat(res.data.list),
           totalPages: res.data.pages

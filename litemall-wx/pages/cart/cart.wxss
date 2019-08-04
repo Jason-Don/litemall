@@ -245,7 +245,7 @@ page {
 
 .cart-view .item.edit .attr {
   text-align: right;
-  background: url(http://yanxuan.nosdn.127.net/hxm/yanxuan-wap/p/20161201/style/img/icon-normal/arrow-right1-e9828c5b35.png) right center no-repeat;
+  background: url(https://yanxuan.nosdn.127.net/hxm/yanxuan-wap/p/20161201/style/img/icon-normal/arrow-right1-e9828c5b35.png) right center no-repeat;
   padding-right: 25rpx;
   background-size: 12rpx 20rpx;
   margin-bottom: 24rpx;

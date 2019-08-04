@@ -6,11 +6,20 @@
 		"postcss": true,
 		"minified": true,
 		"newFeature": true,
-		"uglifyFileName": true
+		"autoAudits": false,
+		"uglifyFileName": true,
+		"checkInvalidKey": true,
+		"checkSiteMap": true,
+		"uploadWithSourceMap": true,
+		"babelSetting": {
+			"ignore": [],
+			"disablePlugins": [],
+			"outputPath": ""
+		}
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.4.0",
-	"appid": "wxa5b486c6b918ecfb",
+	"libVersion": "2.8.0",
+	"appid": "wx8b24d647e23aecc0",
 	"projectname": "litemall-wx",
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},

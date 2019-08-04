@@ -26,6 +26,7 @@ import org.linlinjava.litemall.db.util.CouponUserConstant;
 import org.linlinjava.litemall.db.util.OrderHandleOption;
 import org.linlinjava.litemall.db.util.OrderUtil;
 import org.linlinjava.litemall.core.util.IpUtil;
+import org.linlinjava.litemall.db.util.VipOrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ import org.springframework.util.Assert;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -105,6 +107,9 @@ public class WxOrderService {
     @Autowired
     private CouponVerifyService couponVerifyService;
 
+    @Autowired
+    private LitemallVipOrderService vipOrderService;
+
     /**
      * 订单列表
      *
@@ -119,13 +124,20 @@ public class WxOrderService {
      * @param limit     分页大小
      * @return 订单列表
      */
-    public Object list(Integer userId, Integer showType, Integer page, Integer limit, String sort, String order) {
+    public Object list(Integer userId,boolean isVerifyTime, Integer showType, Integer page, Integer limit, String sort, String order) {
         if (userId == null) {
             return ResponseUtil.unlogin();
         }
 
         List<Short> orderStatus = OrderUtil.orderStatus(showType);
-        List<LitemallOrder> orderList = orderService.queryByOrderStatus(userId, orderStatus, page, limit, sort, order);
+        List<LitemallOrder> orderList = null;
+        try {
+            orderList = orderService.queryByOrderStatus(userId,isVerifyTime, orderStatus, page, limit, sort, order);
+        } catch (Exception e) {
+            logger.error(e.toString());
+            e.printStackTrace();
+            return ResponseUtil.fail();
+        }
 
         List<Map<String, Object>> orderVoList = new ArrayList<>(orderList.size());
         for (LitemallOrder o : orderList) {
@@ -135,6 +147,8 @@ public class WxOrderService {
             orderVo.put("actualPrice", o.getActualPrice());
             orderVo.put("orderStatusText", OrderUtil.orderStatusText(o));
             orderVo.put("handleOption", OrderUtil.build(o));
+            orderVo.put("payType",o.getPayType());
+            orderVo.put("payTypeText",OrderUtil.payTypeText(o));
 
             LitemallGroupon groupon = grouponService.queryByOrderId(o.getId());
             if (groupon != null) {
@@ -152,8 +166,10 @@ public class WxOrderService {
                 orderGoodsVo.put("number", orderGoods.getNumber());
                 orderGoodsVo.put("picUrl", orderGoods.getPicUrl());
                 orderGoodsVo.put("specifications", orderGoods.getSpecifications());
+                orderGoodsVo.put("status",orderGoods.getStatus());
                 orderGoodsVoList.add(orderGoodsVo);
             }
+
             orderVo.put("goodsList", orderGoodsVoList);
 
             orderVoList.add(orderVo);
@@ -193,10 +209,14 @@ public class WxOrderService {
         orderVo.put("couponPrice", order.getCouponPrice());
         orderVo.put("freightPrice", order.getFreightPrice());
         orderVo.put("actualPrice", order.getActualPrice());
+        orderVo.put("balancePrice", order.getBalancePrice());
+        orderVo.put("discount", order.getDiscount());
         orderVo.put("orderStatusText", OrderUtil.orderStatusText(order));
         orderVo.put("handleOption", OrderUtil.build(order));
         orderVo.put("expCode", order.getShipChannel());
         orderVo.put("expNo", order.getShipSn());
+        orderVo.put("payType",order.getPayType());
+        orderVo.put("payTypeText",OrderUtil.payTypeText(order));
 
         List<LitemallOrderGoods> orderGoodsList = orderGoodsService.queryByOid(order.getId());
 
@@ -237,11 +257,12 @@ public class WxOrderService {
             return ResponseUtil.badArgument();
         }
         Integer cartId = JacksonUtil.parseInteger(body, "cartId");
-        Integer addressId = JacksonUtil.parseInteger(body, "addressId");
+//        Integer addressId = JacksonUtil.parseInteger(body, "addressId");
         Integer couponId = JacksonUtil.parseInteger(body, "couponId");
         String message = JacksonUtil.parseString(body, "message");
         Integer grouponRulesId = JacksonUtil.parseInteger(body, "grouponRulesId");
         Integer grouponLinkId = JacksonUtil.parseInteger(body, "grouponLinkId");
+        String payType = JacksonUtil.parseString(body, "payType");
 
         //如果是团购项目,验证活动是否有效
         if (grouponRulesId != null && grouponRulesId > 0) {
@@ -256,15 +277,15 @@ public class WxOrderService {
             }
         }
 
-        if (cartId == null || addressId == null || couponId == null) {
+        if (cartId == null || couponId == null) {
             return ResponseUtil.badArgument();
         }
 
         // 收货地址
-        LitemallAddress checkedAddress = addressService.query(userId, addressId);
-        if (checkedAddress == null) {
-            return ResponseUtil.badArgument();
-        }
+//        LitemallAddress checkedAddress = addressService.query(userId, addressId);
+//        if (checkedAddress == null) {
+//            return ResponseUtil.badArgument();
+//        }
 
         // 团购优惠
         BigDecimal grouponPrice = new BigDecimal(0.00);
@@ -309,18 +330,63 @@ public class WxOrderService {
 
 
         // 根据订单商品总价计算运费，满足条件（例如88元）则免运费，否则需要支付运费（例如8元）；
-        BigDecimal freightPrice = new BigDecimal(0.00);
-        if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
-            freightPrice = SystemConfig.getFreight();
+//        BigDecimal freightPrice = new BigDecimal(0.00);
+//        if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
+//            freightPrice = SystemConfig.getFreight();
+//        }
+
+        BigDecimal discount = new BigDecimal(1.00);
+        //是否有会员折扣
+        LitemallUser user = userService.findById(userId);
+        Integer vipOrderId = user.getVipOrderId();
+        if(null!=vipOrderId && 0!=vipOrderId){
+            LitemallVipOrder vipOrder = vipOrderService.findById(vipOrderId);
+            if(null!=vipOrder){
+                long between = VipOrderUtil.checkVaild(vipOrder);
+                if(between>=0){//有效
+                    discount = vipOrder.getDiscount();
+                }
+            }
         }
 
         // 可以使用的其他钱，例如用户积分
         BigDecimal integralPrice = new BigDecimal(0.00);
 
         // 订单费用
-        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).subtract(couponPrice).max(new BigDecimal(0.00));
+//        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).subtract(couponPrice).max(new BigDecimal(0.00));
+        BigDecimal orderTotalPrice = checkedGoodsPrice.multiply(discount)
+                .subtract(couponPrice).max(new BigDecimal(0.00));
+
         // 最终支付费用
         BigDecimal actualPrice = orderTotalPrice.subtract(integralPrice);
+
+        //用户余额
+        BigDecimal balance = user.getBalance();
+        //余额减免
+        BigDecimal balancePrice = new BigDecimal(0.00);
+        if(balance.compareTo(new BigDecimal(0.00))==1){//余额大于0.00元
+            BigDecimal afterPayBalance = new BigDecimal(0.00);
+            if(balance.compareTo(actualPrice)==-1){//余额小于实付款
+                actualPrice = actualPrice.subtract(balance);
+                //余额全花光了
+                balancePrice = balance;
+            }else if(balance.compareTo(actualPrice)==0){//余额等于实付款
+                actualPrice = new BigDecimal(0.00);
+                //余额全花光了
+                balancePrice = balance;
+            } else if(balance.compareTo(actualPrice)==1){//余额比实付款多
+                balancePrice = actualPrice;
+                //还有余额
+                afterPayBalance = balance.subtract(actualPrice);
+                actualPrice = new BigDecimal(0.00);
+            }
+            //更新账户余额
+            LitemallUser updateUser = new LitemallUser();
+            updateUser.setId(user.getId());
+            updateUser.setBalance(afterPayBalance);
+            userService.updateById(updateUser);
+        }
+
 
         Integer orderId = null;
         LitemallOrder order = null;
@@ -328,18 +394,27 @@ public class WxOrderService {
         order = new LitemallOrder();
         order.setUserId(userId);
         order.setOrderSn(orderService.generateOrderSn(userId));
-        order.setOrderStatus(OrderUtil.STATUS_CREATE);
-        order.setConsignee(checkedAddress.getName());
-        order.setMobile(checkedAddress.getTel());
-        order.setMessage(message);
-        String detailedAddress = checkedAddress.getProvince() + checkedAddress.getCity() + checkedAddress.getCounty() + " " + checkedAddress.getAddressDetail();
-        order.setAddress(detailedAddress);
+        if(actualPrice.compareTo(new BigDecimal(0.00))==0){
+            //实付0.00元，订单状态直接标注已付款；
+            order.setOrderStatus(OrderUtil.STATUS_PAY);
+            order.setPayTime(LocalDateTime.now());
+        }else {
+            order.setOrderStatus(OrderUtil.STATUS_CREATE);
+        }
+//        order.setConsignee(checkedAddress.getName());
+//        order.setMobile(checkedAddress.getTel());
+//        order.setMessage(message);
+//        String detailedAddress = checkedAddress.getProvince() + checkedAddress.getCity() + checkedAddress.getCounty() + " " + checkedAddress.getAddressDetail();
+//        order.setAddress(detailedAddress);
         order.setGoodsPrice(checkedGoodsPrice);
-        order.setFreightPrice(freightPrice);
+//        order.setFreightPrice(freightPrice);
         order.setCouponPrice(couponPrice);
         order.setIntegralPrice(integralPrice);
         order.setOrderPrice(orderTotalPrice);
         order.setActualPrice(actualPrice);
+        order.setBalancePrice(balancePrice);
+        order.setDiscount(discount);
+        order.setPayType(payType);
 
         // 有团购活动
         if (grouponRules != null) {

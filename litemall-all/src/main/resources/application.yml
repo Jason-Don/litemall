@@ -3,9 +3,12 @@ spring:
     active: db, core, admin, wx
   messages:
     encoding: UTF-8
+  devtools:
+    restart:
+      enabled: true
 
 server:
-  port: 8080
+  port: 80
 
 logging:
   level:

@@ -6,6 +6,7 @@ var user = require('../../utils/user.js');
 
 Page({
   data: {
+    operate: true,
     id: 0,
     goods: {},
     groupon: [], //该商品支持的团购规格
@@ -407,6 +408,12 @@ Page({
 
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
+    if(options.operate){
+      this.setData({
+        operate: options.operate === '1' ? true : false
+      })
+    }
+
     if (options.id) {
       this.setData({
         id: parseInt(options.id)
@@ -486,7 +493,8 @@ Page({
   //立即购买（先自动加入购物车）
   addFast: function() {
     var that = this;
-    if (this.data.openAttr == false) {
+    // if (this.data.openAttr == false) {
+    if (false) {//不打开窗口
       //打开规格选择窗口
       this.setData({
         openAttr: !this.data.openAttr

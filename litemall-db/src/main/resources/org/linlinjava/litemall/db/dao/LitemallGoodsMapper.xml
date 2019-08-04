@@ -26,6 +26,12 @@
     <result column="add_time" jdbcType="TIMESTAMP" property="addTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="deleted" jdbcType="BIT" property="deleted" />
+    <result column="grade" jdbcType="INTEGER" property="grade" />
+    <result column="subject" jdbcType="INTEGER" property="subject" />
+    <result column="mode" jdbcType="INTEGER" property="mode" />
+    <result column="address" jdbcType="INTEGER" property="address" />
+    <result column="starttime" jdbcType="TIMESTAMP" property="starttime" />
+    <result column="endtime" jdbcType="TIMESTAMP" property="endtime" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="org.linlinjava.litemall.db.domain.LitemallGoods">
     <!--
@@ -145,7 +151,7 @@
     -->
     id, goods_sn, `name`, category_id, brand_id, gallery, keywords, brief, is_on_sale, 
     sort_order, pic_url, share_url, is_new, is_hot, unit, counter_price, retail_price, 
-    add_time, update_time, deleted
+    add_time, update_time, deleted, grade, subject, `mode`, address, starttime, endtime
   </sql>
   <sql id="Blob_Column_List">
     <!--
@@ -154,6 +160,17 @@
     -->
     detail
   </sql>
+
+  <sql id="Category_Column_List">
+    (select name from litemall_category ca where ca.id = grade and ca.deleted = 0) gradeName,
+    (select name from litemall_category ca where ca.id = subject and ca.deleted = 0) subjectName,
+    (select name from litemall_category ca where ca.id = mode and ca.deleted = 0) modeName,
+    (select name from litemall_category ca where ca.id = address and ca.deleted = 0) addressName,
+    case when starttime > CURRENT_DATE() then '未开课'
+    when starttime &lt;= CURRENT_DATE() and endtime >= CURRENT_DATE() then '开课中'
+    else '已结课' end status
+  </sql>
+
   <select id="selectByExampleWithBLOBs" parameterType="org.linlinjava.litemall.db.domain.LitemallGoodsExample" resultMap="ResultMapWithBLOBs">
     <!--
       WARNING - @mbg.generated
@@ -166,6 +183,8 @@
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
+    ,
+    <include refid="Category_Column_List" />
     from litemall_goods
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -202,7 +221,7 @@
       distinct
     </if>
     <choose>
-      <when test="selective != null and selective.length &gt; 0">
+      <when test="selective != null and selective.length > 0">
         <foreach collection="selective" item="column" separator=",">
           ${column.aliasedEscapedColumnName}
         </foreach>
@@ -213,6 +232,8 @@
         <include refid="Blob_Column_List" />
       </otherwise>
     </choose>
+    ,
+    <include refid="Category_Column_List" />
     from litemall_goods
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -261,7 +282,7 @@
     -->
     select
     <choose>
-      <when test="selective != null and selective.length &gt; 0">
+      <when test="selective != null and selective.length > 0">
         <foreach collection="selective" item="column" separator=",">
           ${column.aliasedEscapedColumnName}
         </foreach>
@@ -307,14 +328,18 @@
       sort_order, pic_url, share_url, 
       is_new, is_hot, unit, counter_price, 
       retail_price, add_time, update_time, 
-      deleted, detail)
+      deleted, grade, subject, 
+      `mode`, address, starttime, 
+      endtime, detail)
     values (#{goodsSn,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{categoryId,jdbcType=INTEGER}, 
       #{brandId,jdbcType=INTEGER}, #{gallery,jdbcType=VARCHAR,typeHandler=org.linlinjava.litemall.db.mybatis.JsonStringArrayTypeHandler}, 
       #{keywords,jdbcType=VARCHAR}, #{brief,jdbcType=VARCHAR}, #{isOnSale,jdbcType=BIT}, 
       #{sortOrder,jdbcType=SMALLINT}, #{picUrl,jdbcType=VARCHAR}, #{shareUrl,jdbcType=VARCHAR}, 
       #{isNew,jdbcType=BIT}, #{isHot,jdbcType=BIT}, #{unit,jdbcType=VARCHAR}, #{counterPrice,jdbcType=DECIMAL}, 
       #{retailPrice,jdbcType=DECIMAL}, #{addTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
-      #{deleted,jdbcType=BIT}, #{detail,jdbcType=LONGVARCHAR})
+      #{deleted,jdbcType=BIT}, #{grade,jdbcType=INTEGER}, #{subject,jdbcType=INTEGER}, 
+      #{mode,jdbcType=INTEGER}, #{address,jdbcType=INTEGER}, #{starttime,jdbcType=TIMESTAMP}, 
+      #{endtime,jdbcType=TIMESTAMP}, #{detail,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="org.linlinjava.litemall.db.domain.LitemallGoods">
     <!--
@@ -383,6 +408,24 @@
       <if test="deleted != null">
         deleted,
       </if>
+      <if test="grade != null">
+        grade,
+      </if>
+      <if test="subject != null">
+        subject,
+      </if>
+      <if test="mode != null">
+        `mode`,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="starttime != null">
+        starttime,
+      </if>
+      <if test="endtime != null">
+        endtime,
+      </if>
       <if test="detail != null">
         detail,
       </if>
@@ -444,6 +487,24 @@
       </if>
       <if test="deleted != null">
         #{deleted,jdbcType=BIT},
+      </if>
+      <if test="grade != null">
+        #{grade,jdbcType=INTEGER},
+      </if>
+      <if test="subject != null">
+        #{subject,jdbcType=INTEGER},
+      </if>
+      <if test="mode != null">
+        #{mode,jdbcType=INTEGER},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=INTEGER},
+      </if>
+      <if test="starttime != null">
+        #{starttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null">
+        #{endtime,jdbcType=TIMESTAMP},
       </if>
       <if test="detail != null">
         #{detail,jdbcType=LONGVARCHAR},
@@ -527,6 +588,24 @@
       <if test="record.deleted != null">
         deleted = #{record.deleted,jdbcType=BIT},
       </if>
+      <if test="record.grade != null">
+        grade = #{record.grade,jdbcType=INTEGER},
+      </if>
+      <if test="record.subject != null">
+        subject = #{record.subject,jdbcType=INTEGER},
+      </if>
+      <if test="record.mode != null">
+        `mode` = #{record.mode,jdbcType=INTEGER},
+      </if>
+      <if test="record.address != null">
+        address = #{record.address,jdbcType=INTEGER},
+      </if>
+      <if test="record.starttime != null">
+        starttime = #{record.starttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.endtime != null">
+        endtime = #{record.endtime,jdbcType=TIMESTAMP},
+      </if>
       <if test="record.detail != null">
         detail = #{record.detail,jdbcType=LONGVARCHAR},
       </if>
@@ -561,6 +640,12 @@
       add_time = #{record.addTime,jdbcType=TIMESTAMP},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP},
       deleted = #{record.deleted,jdbcType=BIT},
+      grade = #{record.grade,jdbcType=INTEGER},
+      subject = #{record.subject,jdbcType=INTEGER},
+      `mode` = #{record.mode,jdbcType=INTEGER},
+      address = #{record.address,jdbcType=INTEGER},
+      starttime = #{record.starttime,jdbcType=TIMESTAMP},
+      endtime = #{record.endtime,jdbcType=TIMESTAMP},
       detail = #{record.detail,jdbcType=LONGVARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -591,7 +676,13 @@
       retail_price = #{record.retailPrice,jdbcType=DECIMAL},
       add_time = #{record.addTime,jdbcType=TIMESTAMP},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP},
-      deleted = #{record.deleted,jdbcType=BIT}
+      deleted = #{record.deleted,jdbcType=BIT},
+      grade = #{record.grade,jdbcType=INTEGER},
+      subject = #{record.subject,jdbcType=INTEGER},
+      `mode` = #{record.mode,jdbcType=INTEGER},
+      address = #{record.address,jdbcType=INTEGER},
+      starttime = #{record.starttime,jdbcType=TIMESTAMP},
+      endtime = #{record.endtime,jdbcType=TIMESTAMP}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -660,6 +751,24 @@
       <if test="deleted != null">
         deleted = #{deleted,jdbcType=BIT},
       </if>
+      <if test="grade != null">
+        grade = #{grade,jdbcType=INTEGER},
+      </if>
+      <if test="subject != null">
+        subject = #{subject,jdbcType=INTEGER},
+      </if>
+      <if test="mode != null">
+        `mode` = #{mode,jdbcType=INTEGER},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=INTEGER},
+      </if>
+      <if test="starttime != null">
+        starttime = #{starttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null">
+        endtime = #{endtime,jdbcType=TIMESTAMP},
+      </if>
       <if test="detail != null">
         detail = #{detail,jdbcType=LONGVARCHAR},
       </if>
@@ -691,6 +800,12 @@
       add_time = #{addTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
       deleted = #{deleted,jdbcType=BIT},
+      grade = #{grade,jdbcType=INTEGER},
+      subject = #{subject,jdbcType=INTEGER},
+      `mode` = #{mode,jdbcType=INTEGER},
+      address = #{address,jdbcType=INTEGER},
+      starttime = #{starttime,jdbcType=TIMESTAMP},
+      endtime = #{endtime,jdbcType=TIMESTAMP},
       detail = #{detail,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -718,7 +833,13 @@
       retail_price = #{retailPrice,jdbcType=DECIMAL},
       add_time = #{addTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      deleted = #{deleted,jdbcType=BIT}
+      deleted = #{deleted,jdbcType=BIT},
+      grade = #{grade,jdbcType=INTEGER},
+      subject = #{subject,jdbcType=INTEGER},
+      `mode` = #{mode,jdbcType=INTEGER},
+      address = #{address,jdbcType=INTEGER},
+      starttime = #{starttime,jdbcType=TIMESTAMP},
+      endtime = #{endtime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectOneByExample" parameterType="org.linlinjava.litemall.db.domain.LitemallGoodsExample" resultMap="BaseResultMap">
@@ -762,7 +883,7 @@
     -->
     select
     <choose>
-      <when test="selective != null and selective.length &gt; 0">
+      <when test="selective != null and selective.length > 0">
         <foreach collection="selective" item="column" separator=",">
           ${column.aliasedEscapedColumnName}
         </foreach>

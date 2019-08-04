@@ -1,0 +1,30 @@
+<!--pages/ucenter/vip/vip.wxml-->
+<view class="a-section a-coupon" wx:if="{{vips.length > 0}}">
+    <view class="h">
+      <view class="title">
+        <view>
+          <!-- <navigator url="/pages/coupon/coupon"> -->
+            <text class="txt">会员列表</text>
+          <!-- </navigator> -->
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{vips.length>0}}" class="b">
+      <view class="item" wx:for="{{vips}}" wx:for-index="index" wx:for-item="item" wx:key="id" bindtap="buyVip" data-index="{{item.id}}">
+        <!-- <view class="tag">{{item.tag}}</view> -->
+        <view class="content">
+          <view class="left">
+            <view class="name">{{item.name}}</view>
+            <!-- <view class="min"> 满{{item.min}}元使用</view> -->
+          </view>
+          <view class="right">
+            <view class="desc">{{item.price}}元</view>
+            <view class="discount">{{item.discountName}}优惠</view>
+            <view class="time" wx:if="{{item.validDays != 0}}">有效期：{{item.validDays}}天</view>
+
+            <!-- <view class="time" wx:else> 有效期：{{item.startTime}} - {{item.endTime}}</view> -->
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>

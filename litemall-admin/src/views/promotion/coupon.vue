@@ -38,7 +38,7 @@
         <template slot-scope="scope">{{ scope.row.limit != 0 ? scope.row.limit : "不限" }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="商品使用范围" prop="goodsType">
+      <el-table-column align="center" label="课程使用范围" prop="goodsType">
         <template slot-scope="scope">{{ scope.row.goodsType | formatGoodsType }}</template>
       </el-table-column>
 
@@ -126,13 +126,13 @@
             <el-date-picker v-model="dataForm.endTime" type="datetime" placeholder="选择日期" value-format="yyyy-MM-dd HH:mm:ss" style="width: 100%;"/>
           </el-col>
         </el-form-item>
-        <el-form-item label="商品限制范围">
-          <el-radio-group v-model="dataForm.goodsType">
-            <el-radio-button :label="0">全场通用</el-radio-button>
-            <el-radio-button :label="1">指定分类</el-radio-button>
-            <el-radio-button :label="2">指定商品</el-radio-button>
-          </el-radio-group>
-        </el-form-item>
+        <!--<el-form-item label="课程限制范围">-->
+        <!--<el-radio-group v-model="dataForm.goodsType">-->
+        <!--<el-radio-button :label="0">全场通用</el-radio-button>-->
+        <!--<el-radio-button :label="1">指定分类</el-radio-button>-->
+        <!--<el-radio-button :label="2">指定课程</el-radio-button>-->
+        <!--</el-radio-group>-->
+        <!--</el-form-item>-->
         <el-form-item v-show="dataForm.goodsType === 1">
           目前不支持
         </el-form-item>
@@ -228,7 +228,7 @@ export default {
       } else if (goodsType === 1) {
         return '指定分类'
       } else {
-        return '指定商品'
+        return '指定课程'
       }
     },
     formatStatus(status) {

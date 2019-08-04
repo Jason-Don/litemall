@@ -12,12 +12,12 @@ Page({
   data: {
     load_statue: true,
     shopInfo: {
-      name: 'litemall',
-      address: 'https://github.com/linlinjava/litemall',
-      latitude: 31.201900,
-      longitude: 121.587839,
-      linkPhone: '021-xxxx-xxxx',
-      qqNumber: '738696120'
+      name: '',
+      address: '',
+      latitude: 0,
+      longitude: 0,
+      linkPhone: '',
+      qqNumber: ''
     },
   },
 
@@ -25,7 +25,17 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    
+    let that = this;
+    util.request(api.ConfigMall).then(function(res) {
+      that.setData({
+        'shopInfo.name':res.data.litemall_mall_name,
+        'shopInfo.address': res.data.litemall_mall_address,
+        'shopInfo.linkPhone': res.data.litemall_mall_phone,
+        'shopInfo.qqNumber': res.data.litemall_mall_qq,
+        'shopInfo.latitude': Number(res.data.litemall_mall_latitude),
+        'shopInfo.longitude': Number(res.data.litemall_mall_longitude)
+      });
+    });
   },
 
   showLocation: function (e) {
@@ -41,6 +51,12 @@ Page({
     var that = this
     wx.makePhoneCall({
       phoneNumber: that.data.shopInfo.linkPhone,
+    })
+  },
+  copyQQ: function(){
+    let that = this
+    wx.setClipboardData({
+      data: that.data.shopInfo.qqNumber
     })
   },
   reLoad: function (e) {

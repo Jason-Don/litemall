@@ -5,6 +5,10 @@
     "pages/newGoods/newGoods",
     "pages/hotGoods/hotGoods",
     "pages/ucenter/index/index",
+    "pages/ucenter/vip/vip",
+    "pages/ucenter/vipBuy/vipBuy",
+    "pages/ucenter/vipOrder/vipOrder",
+    "pages/ucenter/vipOrderDetail/vipOrderDetail",
     "pages/ucenter/address/address",
     "pages/ucenter/addressAdd/addressAdd",
     "pages/ucenter/feedback/feedback",
@@ -30,6 +34,7 @@
     "pages/search/search",
     "pages/category/category",
     "pages/cart/cart",
+    "pages/myorder/myorder",
     "pages/checkout/checkout",
     "pages/goods/goods",
     "pages/about/about",
@@ -41,7 +46,7 @@
   ],
   "window": {
     "navigationBarBackgroundColor": "#FFFFFF",
-    "navigationBarTitleText": "litemall小程序商城",
+    "navigationBarTitleText": "最厉害的培训机构",
     "enablePullDownRefresh": true,
     "navigationBarTextStyle": "black",
     "backgroundColor": "#FFFFFF",
@@ -60,16 +65,10 @@
         "text": "首页"
       },
       {
-        "pagePath": "pages/catalog/catalog",
-        "iconPath": "static/images/category.png",
-        "selectedIconPath": "static/images/category@selected.png",
-        "text": "分类"
-      },
-      {
-        "pagePath": "pages/cart/cart",
+        "pagePath": "pages/myorder/myorder",
         "iconPath": "static/images/cart.png",
         "selectedIconPath": "static/images/cart@selected.png",
-        "text": "购物车"
+        "text": "已购课程"
       },
       {
         "pagePath": "pages/ucenter/index/index",

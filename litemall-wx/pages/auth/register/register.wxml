@@ -1,7 +1,7 @@
 <view class="container">
   <view class="form-box">
 
-    <view class="form-item">
+    <!-- <view class="form-item">
       <input class="username" value="{{username}}" bindinput="bindUsernameInput" placeholder="用户名" auto-focus/>
       <image wx:if="{{ username.length > 0 }}" id="clear-username" class="clear" src="/static/images/clear_input.png" catchtap="clearInput"></image>
     </view>
@@ -14,22 +14,48 @@
     <view class="form-item">
       <input class="password" value="{{confirmPassword}}" password bindinput="bindConfirmPasswordInput" placeholder="确认密码" />
       <image class="clear" id="clear-confirm-password" wx:if="{{ confirmPassword.length > 0 }}" src="/static/images/clear_input.png" catchtap="clearInput"></image>
+    </view> -->
+    <view class="form-item">
+      <input class="username" value="{{name}}" bindinput="bindNameInput" placeholder="学生姓名" auto-focus/>
+      <image id="clear-name" class="clear" wx:if="{{ name.length > 0 }}" src="/static/images/clear_input.png" catchtap="clearInput"></image>
+    </view>
+
+    <view class="form-item">
+      <input class="username" value="{{school}}" bindinput="bindSchoolInput" placeholder="学校" />
+      <image class="clear" id="clear-school" wx:if="{{ school.length > 0 }}" src="/static/images/clear_input.png" catchtap="clearInput"></image>
+    </view>
+
+    <view class="form-item">
+      <input class="username" value="{{grade}}" bindinput="bindGradeInput" placeholder="年级" />
+      <image class="clear" id="clear-grade" wx:if="{{ grade.length > 0 }}" src="/static/images/clear_input.png" catchtap="clearInput"></image>
+    </view>
+
+    <view class="form-item">
+      <picker mode="date" value="{{birthday}}" bindchange="bindDateChange">
+                <view class="username">生日：{{birthday}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <picker bindchange="bindGenderChange" value="{{gender}}" range="{{genderArray}}">
+     <view class='username'>性别：{{genderArray[gender]}}</view>
+    </picker>
     </view>
 
     <view class="form-item">
       <input class="mobile" value="{{mobile}}" bindinput="bindMobileInput" placeholder="手机号" />
-      <image wx:if="{{ mobile.length > 0 }}" id="clear-mobile" class="clear" src="/static/images/clear_input.png" catchtap="clearInput"></image>
+      <image id="clear-mobile" class="clear" wx:if="{{ mobile.length > 0 }}" src="/static/images/clear_input.png" catchtap="clearInput"></image>
     </view>
 
-    <view class="form-item-code">
+    <!-- <view class="form-item-code">
       <view class="form-item code-item">
         <input class="code" value="{{code}}" bindinput="bindCodeInput" placeholder="验证码" />
         <image class="clear" id="clear-code" wx:if="{{ code.length > 0 }}" src="/static/images/clear_input.png" catchtap="clearInput"></image>
       </view>
       <view class="code-btn" bindtap="sendCode">获取验证码</view>
-    </view>
+    </view> -->
 
-    <button type="primary" class="register-btn" bindtap="startRegister">注册</button>
+    <button type="primary" class="register-btn" bindtap="startRegister">保存</button>
 
   </view>
 </view>

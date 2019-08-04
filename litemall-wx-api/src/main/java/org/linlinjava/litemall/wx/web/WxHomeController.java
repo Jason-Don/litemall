@@ -4,6 +4,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.system.SystemConfig;
 import org.linlinjava.litemall.core.util.ResponseUtil;
+import org.linlinjava.litemall.core.validator.Order;
+import org.linlinjava.litemall.core.validator.Sort;
 import org.linlinjava.litemall.db.domain.LitemallCategory;
 import org.linlinjava.litemall.db.domain.LitemallGoods;
 import org.linlinjava.litemall.db.service.*;
@@ -14,9 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,6 +100,8 @@ public class WxHomeController {
         }
 
 
+//        goodsService.queryByCategory();
+
         Callable<List> newGoodsListCallable = () -> goodsService.queryByNew(0, SystemConfig.getNewLimit());
 
         Callable<List> hotGoodsListCallable = () -> goodsService.queryByHot(0, SystemConfig.getHotLimit());
@@ -147,7 +154,31 @@ public class WxHomeController {
         }finally {
             executorService.shutdown();
         }
+        //获取类型的子类型
+        List<LitemallCategory> list = (List) entity.get("channel");
+        list.forEach( currentCategory -> {
+            List<LitemallCategory> subCategories = categoryService.queryByPid(currentCategory.getId());
+            currentCategory.setSubCategory(subCategories);
+        });
+
         return ResponseUtil.ok(entity);
+    }
+
+    @GetMapping("/queryGoodsList")
+    public Object queryGoodsList(Integer grade, Integer subject,Integer mode,Integer address
+
+            ,@LoginUser Integer userId,
+             @RequestParam(defaultValue = "1") Integer page,
+             @RequestParam(defaultValue = "10") Integer limit,
+             @Sort(accepts = {"add_time", "retail_price", "name"})
+             @RequestParam(defaultValue = "add_time") String sort,
+             @Order @RequestParam(defaultValue = "desc") String order){
+
+        //查询列表数据
+        List<LitemallGoods> goodsList = goodsService.querySelective(grade, subject, mode, address,
+                page, limit, sort, order, LocalDate.now().atStartOfDay());
+
+        return ResponseUtil.okList(goodsList);
     }
 
     private List<Map> getCategoryList() {

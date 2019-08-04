@@ -1,23 +1,48 @@
 <view class="container">
   <view class="pay-result">
     <view class="success" wx:if="{{status}}">
-      <view class="msg">付款成功</view>
+
+      <view wx:if="{{payType == 'offline'}}">
+        <view class="msg">线下付款下单成功</view>
+        <view class="tips">
+          <view class="p">请在线下付款后，联系管理员确认付款！</view>
+          <view class="p">否则<text class="time">半小时</text>后</view>
+          <view class="p">订单将会被系统取消</view>
+        </view>
+      </view>
+
+      <view wx:if="{{payType == 'online'}}">
+        <view class="msg">付款成功</view>
+      </view>
+      
       <view class="btns">
-        <navigator class="btn" url="/pages/ucenter/order/order" open-type="redirect">查看订单</navigator>
+        <navigator class="btn" url="{{checkOrderUrl}}" open-type="redirect">查看订单</navigator>
         <navigator class="btn" url="/pages/index/index" open-type="switchTab">继续逛</navigator>
       </view>
     </view>
     <view class="error" wx:if="{{!status}}">
-      <view class="msg">付款失败</view>
-      <view class="tips">
-        <view class="p">请在
-          <text class="time">半小时</text> 内完成付款</view>
-        <view class="p">否则订单将会被系统取消</view>
+
+      <view wx:if="{{payType == 'offline'}}">
+        <view class="msg">线下付款下单失败</view>
+        <view class="tips">
+          <view class="p"></view>
+        </view>
       </view>
-      <view class="btns">
-        <navigator class="btn" url="/pages/ucenter/order/order" open-type="redirect">查看订单</navigator>
-        <view class="btn" bindtap='payOrder'>重新付款</view>
+
+      <view wx:if="{{payType == 'online'}}">
+        <view class="msg">付款失败</view>
+        <view class="tips">
+          <view class="p">请在
+            <text class="time">半小时</text> 内完成付款</view>
+          <view class="p">否则订单将会被系统取消</view>
+        </view>
+        <view class="btns">
+          <navigator class="btn" url="/pages/ucenter/order/order" open-type="redirect">查看订单</navigator>
+          <view class="btn" bindtap='payOrder'>重新付款</view>
+        </view>
       </view>
+
+
     </view>
   </view>
 

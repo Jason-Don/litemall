@@ -28,6 +28,14 @@ export function shipOrder(data) {
   })
 }
 
+export function payOrder(data) {
+  return request({
+    url: '/order/pay',
+    method: 'post',
+    data
+  })
+}
+
 export function refundOrder(data) {
   return request({
     url: '/order/refund',

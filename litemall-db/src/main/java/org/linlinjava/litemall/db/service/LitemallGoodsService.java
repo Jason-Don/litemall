@@ -9,13 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class LitemallGoodsService {
-    Column[] columns = new Column[]{Column.id, Column.name, Column.brief, Column.picUrl, Column.isHot, Column.isNew, Column.counterPrice, Column.retailPrice};
+    Column[] columns = new Column[]{Column.id, Column.name, Column.brief, Column.picUrl, Column.isHot, Column.isNew,
+            Column.counterPrice, Column.retailPrice, Column.grade, Column.subject, Column.mode, Column.address};
     @Resource
     private LitemallGoodsMapper goodsMapper;
 
@@ -108,10 +110,10 @@ public class LitemallGoodsService {
             criteria1.andIsHotEqualTo(isHot);
             criteria2.andIsHotEqualTo(isHot);
         }
-        if (!StringUtils.isEmpty(keywords)) {
+//        if (!StringUtils.isEmpty(keywords)) {
             criteria1.andKeywordsLike("%" + keywords + "%");
             criteria2.andNameLike("%" + keywords + "%");
-        }
+//        }
         criteria1.andIsOnSaleEqualTo(true);
         criteria2.andIsOnSaleEqualTo(true);
         criteria1.andDeletedEqualTo(false);
@@ -126,15 +128,51 @@ public class LitemallGoodsService {
         return goodsMapper.selectByExampleSelective(example, columns);
     }
 
-    public List<LitemallGoods> querySelective(String goodsSn, String name, Integer page, Integer size, String sort, String order) {
+    public List<LitemallGoods> querySelective(Integer grade, Integer subject,Integer mode, Integer address
+            , Integer page, Integer size, String sort, String order,LocalDateTime endTime) {
         LitemallGoodsExample example = new LitemallGoodsExample();
         LitemallGoodsExample.Criteria criteria = example.createCriteria();
 
-        if (!StringUtils.isEmpty(goodsSn)) {
-            criteria.andGoodsSnEqualTo(goodsSn);
+        if (!StringUtils.isEmpty(grade)) {
+            criteria.andGradeEqualTo(grade);
+        }
+        if (!StringUtils.isEmpty(subject)) {
+            criteria.andSubjectEqualTo(subject);
+        }
+        if (!StringUtils.isEmpty(mode)) {
+            criteria.andModeEqualTo(mode);
+        }
+        if (!StringUtils.isEmpty(address)) {
+            criteria.andAddressEqualTo(address);
+        }
+        if(!StringUtils.isEmpty(endTime)){
+//            criteria.andEndtimeGreaterThan(endTime);
+            criteria.andEndtimeGreaterThanOrEqualTo(endTime);
+        }
+        criteria.andDeletedEqualTo(false);
+
+        if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
+            example.setOrderByClause(sort + " " + order);
+        }
+
+        PageHelper.startPage(page, size);
+//        return goodsMapper.selectByExampleWithBLOBs(example);
+        return goodsMapper.selectByExampleSelective(example, columns);
+    }
+
+
+    public List<LitemallGoods> querySelective(Integer id, String name,Integer brandId, Integer page, Integer size, String sort, String order) {
+        LitemallGoodsExample example = new LitemallGoodsExample();
+        LitemallGoodsExample.Criteria criteria = example.createCriteria();
+
+        if (!StringUtils.isEmpty(id)) {
+            criteria.andIdEqualTo(id);
         }
         if (!StringUtils.isEmpty(name)) {
             criteria.andNameLike("%" + name + "%");
+        }
+        if (!StringUtils.isEmpty(brandId)) {
+            criteria.andBrandIdEqualTo(brandId);
         }
         criteria.andDeletedEqualTo(false);
 
@@ -225,10 +263,10 @@ public class LitemallGoodsService {
             criteria1.andIsHotEqualTo(isHot);
             criteria2.andIsHotEqualTo(isHot);
         }
-        if (!StringUtils.isEmpty(keywords)) {
+//        if (!StringUtils.isEmpty(keywords)) {
             criteria1.andKeywordsLike("%" + keywords + "%");
             criteria2.andNameLike("%" + keywords + "%");
-        }
+//        }
         criteria1.andIsOnSaleEqualTo(true);
         criteria2.andIsOnSaleEqualTo(true);
         criteria1.andDeletedEqualTo(false);

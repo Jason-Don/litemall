@@ -4,15 +4,37 @@ var check = require('../../../utils/check.js');
 var app = getApp();
 Page({
   data: {
-    username: '',
-    password: '',
-    confirmPassword: '',
+    // username: '',
+    // password: '',
+    // confirmPassword: '',
+    genderArray:['-请选择-','男', '女'],
+    name: '',
+    school: '',
+    grade:'',
+    birthday: '',
+    gender:0,
     mobile: '',
-    code: ''
+    wxCode: ''
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
     // 页面渲染完成
+    let that = this;
+    wx.login({
+      success: function(res) {
+        if (!res.code) {
+          wx.showModal({
+            title: '错误信息',
+            content: '注册失败',
+            showCancel: false
+          });
+        }
+        that.setData({
+          wxCode:res.code
+        })
+        that.init()
+      }
+    });
 
   },
   onReady: function() {
@@ -30,31 +52,59 @@ Page({
     // 页面关闭
 
   },
-  sendCode: function() {
+  // sendCode: function() {
+  //   let that = this;
+
+  //   if (this.data.mobile.length == 0) {
+  //     wx.showModal({
+  //       title: '错误信息',
+  //       content: '手机号不能为空',
+  //       showCancel: false
+  //     });
+  //     return false;
+  //   }
+
+  //   if (!check.isValidPhone(this.data.mobile)) {
+  //     wx.showModal({
+  //       title: '错误信息',
+  //       content: '手机号输入不正确',
+  //       showCancel: false
+  //     });
+  //     return false;
+  //   }
+
+  //   wx.request({
+  //     url: api.AuthRegisterCaptcha,
+  //     data: {
+  //       mobile: that.data.mobile
+  //     },
+  //     method: 'POST',
+  //     header: {
+  //       'content-type': 'application/json'
+  //     },
+  //     success: function(res) {
+  //       if (res.data.errno == 0) {
+  //         wx.showModal({
+  //           title: '发送成功',
+  //           content: '验证码已发送',
+  //           showCancel: false
+  //         });
+  //       } else {
+  //         wx.showModal({
+  //           title: '错误信息',
+  //           content: res.data.errmsg,
+  //           showCancel: false
+  //         });
+  //       }
+  //     }
+  //   });
+  // },
+  init: function() {
     let that = this;
-
-    if (this.data.mobile.length == 0) {
-      wx.showModal({
-        title: '错误信息',
-        content: '手机号不能为空',
-        showCancel: false
-      });
-      return false;
-    }
-
-    if (!check.isValidPhone(this.data.mobile)) {
-      wx.showModal({
-        title: '错误信息',
-        content: '手机号输入不正确',
-        showCancel: false
-      });
-      return false;
-    }
-
     wx.request({
-      url: api.AuthRegisterCaptcha,
+      url: api.AuthGetUserInfo,
       data: {
-        mobile: that.data.mobile
+        wxCode: that.data.wxCode
       },
       method: 'POST',
       header: {
@@ -62,11 +112,15 @@ Page({
       },
       success: function(res) {
         if (res.data.errno == 0) {
-          wx.showModal({
-            title: '发送成功',
-            content: '验证码已发送',
-            showCancel: false
-          });
+          that.setData({
+            name: res.data.data.name,
+            school: res.data.data.school,
+            grade: res.data.data.grade,
+            birthday: res.data.data.birthday,
+            gender: res.data.data.gender,
+            mobile: res.data.data.mobile
+          })
+          console.log(res)
         } else {
           wx.showModal({
             title: '错误信息',
@@ -77,16 +131,19 @@ Page({
       }
     });
   },
-  requestRegister: function(wxCode) {
+  requestRegister: function() {
     let that = this;
     wx.request({
-      url: api.AuthRegister,
+      url: api.AuthSaveUserInfo,
       data: {
-        username: that.data.username,
-        password: that.data.password,
+        name: that.data.name,
+        school: that.data.school,
+        grade: that.data.grade,
+        birthday: that.data.birthday,
+        gender: that.data.gender,
         mobile: that.data.mobile,
-        code: that.data.code,
-        wxCode: wxCode
+        // code: that.data.code,
+        wxCode: that.data.wxCode
       },
       method: 'POST',
       header: {
@@ -118,28 +175,69 @@ Page({
   startRegister: function() {
     var that = this;
 
-    if (this.data.password.length < 6 || this.data.username.length < 6) {
+    // if (this.data.password.length < 6 || this.data.username.length < 6) {
+    //   wx.showModal({
+    //     title: '错误信息',
+    //     content: '用户名和密码不得少于6位',
+    //     showCancel: false
+    //   });
+    //   return false;
+    // }
+
+    // if (this.data.password != this.data.confirmPassword) {
+    //   wx.showModal({
+    //     title: '错误信息',
+    //     content: '确认密码不一致',
+    //     showCancel: false
+    //   });
+    //   return false;
+    // }
+
+    if (this.data.name == '' ) {
       wx.showModal({
         title: '错误信息',
-        content: '用户名和密码不得少于6位',
+        content: '学生姓名为空',
+        showCancel: false
+      });
+      return false;
+    }
+    if (this.data.school == '' ) {
+      wx.showModal({
+        title: '错误信息',
+        content: '学校为空',
+        showCancel: false
+      });
+      return false;
+    }
+    if (this.data.grade == '' ) {
+      wx.showModal({
+        title: '错误信息',
+        content: '年级为空',
+        showCancel: false
+      });
+      return false;
+    }
+    if (this.data.birthday == '' ) {
+      wx.showModal({
+        title: '错误信息',
+        content: '生日为空',
+        showCancel: false
+      });
+      return false;
+    }
+    if (this.data.gender == 0 ) {
+      wx.showModal({
+        title: '错误信息',
+        content: '性别未选择',
         showCancel: false
       });
       return false;
     }
 
-    if (this.data.password != this.data.confirmPassword) {
+    if (this.data.mobile.length == 0 ) {
       wx.showModal({
         title: '错误信息',
-        content: '确认密码不一致',
-        showCancel: false
-      });
-      return false;
-    }
-
-    if (this.data.mobile.length == 0 || this.data.code.length == 0) {
-      wx.showModal({
-        title: '错误信息',
-        content: '手机号和验证码不能为空',
+        content: '手机号不能为空',
         showCancel: false
       });
       return false;
@@ -163,28 +261,58 @@ Page({
             showCancel: false
           });
         }
-
-        that.requestRegister(res.code);
+        that.setData({
+          wxCode:res.code
+        })
+        that.requestRegister();
       }
     });
   },
-  bindUsernameInput: function(e) {
+  // bindUsernameInput: function(e) {
+
+  //   this.setData({
+  //     username: e.detail.value
+  //   });
+  // },
+  // bindPasswordInput: function(e) {
+
+  //   this.setData({
+  //     password: e.detail.value
+  //   });
+  // },
+  // bindConfirmPasswordInput: function(e) {
+
+  //   this.setData({
+  //     confirmPassword: e.detail.value
+  //   });
+  // },
+  bindNameInput: function(e) {
 
     this.setData({
-      username: e.detail.value
+      name: e.detail.value
     });
   },
-  bindPasswordInput: function(e) {
+  bindSchoolInput: function(e) {
 
     this.setData({
-      password: e.detail.value
+      school: e.detail.value
     });
   },
-  bindConfirmPasswordInput: function(e) {
+  bindGradeInput: function(e) {
 
     this.setData({
-      confirmPassword: e.detail.value
+      grade: e.detail.value
     });
+  },
+  bindDateChange: function (e) {
+    this.setData({
+        birthday: e.detail.value
+    })
+  },
+  bindGenderChange: function(e){
+    this.setData({
+      gender: e.detail.value
+  })
   },
   bindMobileInput: function(e) {
 
@@ -200,19 +328,19 @@ Page({
   },
   clearInput: function(e) {
     switch (e.currentTarget.id) {
-      case 'clear-username':
+      case 'clear-name':
         this.setData({
-          username: ''
+          name: ''
         });
         break;
-      case 'clear-password':
+      case 'clear-school':
         this.setData({
-          password: ''
+          school: ''
         });
         break;
-      case 'clear-confirm-password':
+      case 'clear-grade':
         this.setData({
-          confirmPassword: ''
+          grade: ''
         });
         break;
       case 'clear-mobile':

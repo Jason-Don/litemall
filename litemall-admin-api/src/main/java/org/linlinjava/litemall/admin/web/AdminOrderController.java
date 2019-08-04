@@ -40,11 +40,12 @@ public class AdminOrderController {
     @GetMapping("/list")
     public Object list(Integer userId, String orderSn,
                        @RequestParam(required = false) List<Short> orderStatusArray,
+                       String payType,
                        @RequestParam(defaultValue = "1") Integer page,
                        @RequestParam(defaultValue = "10") Integer limit,
                        @Sort @RequestParam(defaultValue = "add_time") String sort,
                        @Order @RequestParam(defaultValue = "desc") String order) {
-        return adminOrderService.list(userId, orderSn, orderStatusArray, page, limit, sort, order);
+        return adminOrderService.list(userId, orderSn, orderStatusArray, payType, page, limit, sort, order);
     }
 
     /**
@@ -86,6 +87,18 @@ public class AdminOrderController {
         return adminOrderService.ship(body);
     }
 
+    /**
+     * 修改订单状态为 付款
+     *
+     * @param body 订单信息，{ orderId：xxx, actualPrice：xxx }
+     * @return
+     */
+    @RequiresPermissions("admin:order:pay")
+    @RequiresPermissionsDesc(menu = {"商场管理", "订单管理"}, button = "确认付款")
+    @PostMapping("/pay")
+    public Object pay(@RequestBody String body) {
+        return adminOrderService.pay(body);
+    }
 
     /**
      * 回复订单商品

@@ -32,6 +32,9 @@
     <result column="add_time" jdbcType="TIMESTAMP" property="addTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="deleted" jdbcType="BIT" property="deleted" />
+    <result column="pay_type" jdbcType="VARCHAR" property="payType" />
+    <result column="balance_price" jdbcType="DECIMAL" property="balancePrice" />
+    <result column="discount" jdbcType="DECIMAL" property="discount" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -107,7 +110,7 @@
     id, user_id, order_sn, order_status, consignee, mobile, address, message, goods_price, 
     freight_price, coupon_price, integral_price, groupon_price, order_price, actual_price, 
     pay_id, pay_time, ship_sn, ship_channel, ship_time, confirm_time, comments, end_time, 
-    add_time, update_time, deleted
+    add_time, update_time, deleted, pay_type, balance_price, discount
   </sql>
   <select id="selectByExample" parameterType="org.linlinjava.litemall.db.domain.LitemallOrderExample" resultMap="BaseResultMap">
     <!--
@@ -236,7 +239,8 @@
       pay_time, ship_sn, ship_channel, 
       ship_time, confirm_time, comments, 
       end_time, add_time, update_time, 
-      deleted)
+      deleted, pay_type, balance_price, 
+      discount)
     values (#{userId,jdbcType=INTEGER}, #{orderSn,jdbcType=VARCHAR}, #{orderStatus,jdbcType=SMALLINT}, 
       #{consignee,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, 
       #{message,jdbcType=VARCHAR}, #{goodsPrice,jdbcType=DECIMAL}, #{freightPrice,jdbcType=DECIMAL}, 
@@ -245,7 +249,8 @@
       #{payTime,jdbcType=TIMESTAMP}, #{shipSn,jdbcType=VARCHAR}, #{shipChannel,jdbcType=VARCHAR}, 
       #{shipTime,jdbcType=TIMESTAMP}, #{confirmTime,jdbcType=TIMESTAMP}, #{comments,jdbcType=SMALLINT}, 
       #{endTime,jdbcType=TIMESTAMP}, #{addTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
-      #{deleted,jdbcType=BIT})
+      #{deleted,jdbcType=BIT}, #{payType,jdbcType=VARCHAR}, #{balancePrice,jdbcType=DECIMAL}, 
+      #{discount,jdbcType=DECIMAL})
   </insert>
   <insert id="insertSelective" parameterType="org.linlinjava.litemall.db.domain.LitemallOrder">
     <!--
@@ -332,6 +337,15 @@
       <if test="deleted != null">
         deleted,
       </if>
+      <if test="payType != null">
+        pay_type,
+      </if>
+      <if test="balancePrice != null">
+        balance_price,
+      </if>
+      <if test="discount != null">
+        discount,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="userId != null">
@@ -408,6 +422,15 @@
       </if>
       <if test="deleted != null">
         #{deleted,jdbcType=BIT},
+      </if>
+      <if test="payType != null">
+        #{payType,jdbcType=VARCHAR},
+      </if>
+      <if test="balancePrice != null">
+        #{balancePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="discount != null">
+        #{discount,jdbcType=DECIMAL},
       </if>
     </trim>
   </insert>
@@ -506,6 +529,15 @@
       <if test="record.deleted != null">
         deleted = #{record.deleted,jdbcType=BIT},
       </if>
+      <if test="record.payType != null">
+        pay_type = #{record.payType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.balancePrice != null">
+        balance_price = #{record.balancePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.discount != null">
+        discount = #{record.discount,jdbcType=DECIMAL},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -542,7 +574,10 @@
       end_time = #{record.endTime,jdbcType=TIMESTAMP},
       add_time = #{record.addTime,jdbcType=TIMESTAMP},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP},
-      deleted = #{record.deleted,jdbcType=BIT}
+      deleted = #{record.deleted,jdbcType=BIT},
+      pay_type = #{record.payType,jdbcType=VARCHAR},
+      balance_price = #{record.balancePrice,jdbcType=DECIMAL},
+      discount = #{record.discount,jdbcType=DECIMAL}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -629,6 +664,15 @@
       <if test="deleted != null">
         deleted = #{deleted,jdbcType=BIT},
       </if>
+      <if test="payType != null">
+        pay_type = #{payType,jdbcType=VARCHAR},
+      </if>
+      <if test="balancePrice != null">
+        balance_price = #{balancePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="discount != null">
+        discount = #{discount,jdbcType=DECIMAL},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -662,7 +706,10 @@
       end_time = #{endTime,jdbcType=TIMESTAMP},
       add_time = #{addTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      deleted = #{deleted,jdbcType=BIT}
+      deleted = #{deleted,jdbcType=BIT},
+      pay_type = #{payType,jdbcType=VARCHAR},
+      balance_price = #{balancePrice,jdbcType=DECIMAL},
+      discount = #{discount,jdbcType=DECIMAL}
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectOneByExample" parameterType="org.linlinjava.litemall.db.domain.LitemallOrderExample" resultMap="BaseResultMap">

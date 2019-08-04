@@ -1,0 +1,66 @@
+<view class="container">
+
+  <view class="a-section a-coupon">
+    <view class="h">
+      <view class="title">
+        <view>
+            <text class="txt">会员卡</text>
+        </view>
+      </view>
+    </view>
+    <view class="b">
+      <view class="item" >
+        <view class="content">
+          <view class="left">
+            <view class="name">{{vip.name}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="order-box">
+    <view class="order-item">
+      <view class="l">
+        <text class="name">会员名称</text>
+      </view>
+      <view class="r">
+        <text class="txt">{{vip.name}}</text>
+      </view>
+    </view>
+
+    <view class="order-item">
+      <view class="l">
+        <text class="name">折扣</text>
+      </view>
+      <view class="r">
+        <text class="txt">{{vip.discountName}}</text>
+      </view>
+    </view>
+
+    <view class="order-item">
+      <view class="l">
+        <text class="name">有效天数</text>
+      </view>
+      <view class="r">
+        <text class="txt">{{vip.validDays}}天</text>
+      </view>
+    </view>
+
+    <view class="order-item">
+      <view class="l">
+        <text class="name">合计</text>
+      </view>
+      <view class="r">
+        <text class="txt">￥{{vip.price}}元</text>
+      </view>
+    </view>
+  
+  </view>
+
+  <view class="order-total">
+    <view class="l">实付：￥{{vip.price}}</view>
+    <view class="offline" bindtap="submitOrder" data-paytype="offline">线下付款</view>
+    <view class="online"  data-paytype="online">在线付款(未开放)</view>
+  </view>
+</view>

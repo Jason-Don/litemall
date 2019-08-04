@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,6 +43,21 @@ public class LitemallOrderService {
         return litemallOrderMapper.selectByPrimaryKey(orderId);
     }
 
+    public List<LitemallOrder> findByIds_PayOrder(List<Integer> orderIds) {
+
+        LitemallOrderExample example = new LitemallOrderExample();
+
+        LitemallOrderExample.Criteria criteria = example.or();
+        if (orderIds!=null && orderIds.size() >0) {
+            criteria.andIdIn(orderIds);
+        }
+        criteria.andOrderStatusEqualTo(OrderUtil.STATUS_PAY);
+        criteria.andDeletedEqualTo(false);
+
+        return litemallOrderMapper.selectByExample(example);
+    }
+
+
     private String getRandomNum(Integer num) {
         String base = "0123456789";
         Random random = new Random();
@@ -69,10 +86,12 @@ public class LitemallOrderService {
         return orderSn;
     }
 
-    public List<LitemallOrder> queryByOrderStatus(Integer userId, List<Short> orderStatus, Integer page, Integer limit, String sort, String order) {
+    public List<LitemallOrder> queryByOrderStatus(Integer userId,boolean isVerifyTime, List<Short> orderStatus, Integer page, Integer limit,
+                                                  String sort, String order)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         LitemallOrderExample example = new LitemallOrderExample();
         example.setOrderByClause(LitemallOrder.Column.addTime.desc());
-        LitemallOrderExample.Criteria criteria = example.or();
+        LitemallOrderExample.Criteria criteria = example.createCriteria();
         criteria.andUserIdEqualTo(userId);
         if (orderStatus != null) {
             criteria.andOrderStatusIn(orderStatus);
@@ -81,12 +100,26 @@ public class LitemallOrderService {
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
             example.setOrderByClause(sort + " " + order);
         }
+        //page == 0 不分页
+        if(page > 0){
+            PageHelper.startPage(page, limit);
+        }
 
-        PageHelper.startPage(page, limit);
+        if(isVerifyTime){
+        //加入自定义sql
+            String sql = "id in (select og.order_id from litemall_order_goods og " +
+                    "join litemall_goods g on g.id = og.goods_id and g.endtime >= CURRENT_DATE() and g.endtime is not null)";
+            Class<?> criteriaCls  =  LitemallOrderExample.Criteria.class;
+            Class<?> generatedCriteriaCls = criteriaCls.getSuperclass();
+            Method addCriterion = generatedCriteriaCls.getDeclaredMethod("addCriterion", String.class);
+            addCriterion.setAccessible(true);
+            addCriterion.invoke(criteria,sql);
+        }
+
         return litemallOrderMapper.selectByExample(example);
     }
 
-    public List<LitemallOrder> querySelective(Integer userId, String orderSn, List<Short> orderStatusArray, Integer page, Integer limit, String sort, String order) {
+    public List<LitemallOrder> querySelective(Integer userId, String orderSn, List<Short> orderStatusArray, String payType, Integer page, Integer limit, String sort, String order) {
         LitemallOrderExample example = new LitemallOrderExample();
         LitemallOrderExample.Criteria criteria = example.createCriteria();
 
@@ -99,6 +132,11 @@ public class LitemallOrderService {
         if (orderStatusArray != null && orderStatusArray.size() != 0) {
             criteria.andOrderStatusIn(orderStatusArray);
         }
+
+        if (!StringUtils.isEmpty(payType)) {
+            criteria.andPayTypeEqualTo(payType);
+        }
+
         criteria.andDeletedEqualTo(false);
 
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {

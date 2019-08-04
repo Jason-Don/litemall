@@ -13,21 +13,21 @@
 
       <el-table-column align="center" label="类目名" prop="name"/>
 
-      <el-table-column align="center" property="iconUrl" label="类目图标">
-        <template slot-scope="scope">
-          <img v-if="scope.row.iconUrl" :src="scope.row.iconUrl" width="40">
-        </template>
-      </el-table-column>
+      <!--<el-table-column align="center" property="iconUrl" label="类目图标">-->
+      <!--<template slot-scope="scope">-->
+      <!--<img v-if="scope.row.iconUrl" :src="scope.row.iconUrl" width="40">-->
+      <!--</template>-->
+      <!--</el-table-column>-->
 
-      <el-table-column align="center" property="picUrl" label="类目图片">
-        <template slot-scope="scope">
-          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" width="80">
-        </template>
-      </el-table-column>
+      <!--<el-table-column align="center" property="picUrl" label="类目图片">-->
+      <!--<template slot-scope="scope">-->
+      <!--<img v-if="scope.row.picUrl" :src="scope.row.picUrl" width="80">-->
+      <!--</template>-->
+      <!--</el-table-column>-->
 
-      <el-table-column align="center" label="关键字" prop="keywords"/>
+      <!--<el-table-column align="center" label="关键字" prop="keywords"/>-->
 
-      <el-table-column align="center" min-width="100" label="简介" prop="desc"/>
+      <!--<el-table-column align="center" min-width="100" label="简介" prop="desc"/>-->
 
       <el-table-column align="center" label="级别" prop="level">
         <template slot-scope="scope">
@@ -63,33 +63,33 @@
             <el-option v-for="item in catL1" :key="item.value" :label="item.label" :value="item.value"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="类目图标" prop="iconUrl">
-          <el-upload
-            :headers="headers"
-            :action="uploadPath"
-            :show-file-list="false"
-            :on-success="uploadIconUrl"
-            class="avatar-uploader"
-            accept=".jpg,.jpeg,.png,.gif">
-            <img v-if="dataForm.iconUrl" :src="dataForm.iconUrl" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon"/>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="类目图片" prop="picUrl">
-          <el-upload
-            :headers="headers"
-            :action="uploadPath"
-            :show-file-list="false"
-            :on-success="uploadPicUrl"
-            class="avatar-uploader"
-            accept=".jpg,.jpeg,.png,.gif">
-            <img v-if="dataForm.picUrl" :src="dataForm.picUrl" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon"/>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="类目简介" prop="desc">
-          <el-input v-model="dataForm.desc"/>
-        </el-form-item>
+        <!--<el-form-item label="类目图标" prop="iconUrl">-->
+        <!--<el-upload-->
+        <!--:headers="headers"-->
+        <!--:action="uploadPath"-->
+        <!--:show-file-list="false"-->
+        <!--:on-success="uploadIconUrl"-->
+        <!--class="avatar-uploader"-->
+        <!--accept=".jpg,.jpeg,.png,.gif">-->
+        <!--<img v-if="dataForm.iconUrl" :src="dataForm.iconUrl" class="avatar">-->
+        <!--<i v-else class="el-icon-plus avatar-uploader-icon"/>-->
+        <!--</el-upload>-->
+        <!--</el-form-item>-->
+        <!--<el-form-item label="类目图片" prop="picUrl">-->
+        <!--<el-upload-->
+        <!--:headers="headers"-->
+        <!--:action="uploadPath"-->
+        <!--:show-file-list="false"-->
+        <!--:on-success="uploadPicUrl"-->
+        <!--class="avatar-uploader"-->
+        <!--accept=".jpg,.jpeg,.png,.gif">-->
+        <!--<img v-if="dataForm.picUrl" :src="dataForm.picUrl" class="avatar">-->
+        <!--<i v-else class="el-icon-plus avatar-uploader-icon"/>-->
+        <!--</el-upload>-->
+        <!--</el-form-item>-->
+        <!--<el-form-item label="类目简介" prop="desc">-->
+        <!--<el-input v-model="dataForm.desc"/>-->
+        <!--</el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>

@@ -3,18 +3,15 @@ package org.linlinjava.litemall.admin.job;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.system.SystemConfig;
-import org.linlinjava.litemall.db.domain.LitemallGoodsProduct;
-import org.linlinjava.litemall.db.domain.LitemallOrder;
-import org.linlinjava.litemall.db.domain.LitemallOrderGoods;
-import org.linlinjava.litemall.db.service.LitemallGoodsProductService;
-import org.linlinjava.litemall.db.service.LitemallOrderGoodsService;
-import org.linlinjava.litemall.db.service.LitemallOrderService;
+import org.linlinjava.litemall.db.domain.*;
+import org.linlinjava.litemall.db.service.*;
 import org.linlinjava.litemall.db.util.OrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,7 +23,11 @@ public class OrderJob {
     private final Log logger = LogFactory.getLog(OrderJob.class);
 
     @Autowired
+    private LitemallUserService userService;
+    @Autowired
     private LitemallOrderGoodsService orderGoodsService;
+    @Autowired
+    private LitemallVipOrderService vipOrderService;
     @Autowired
     private LitemallOrderService orderService;
     @Autowired
@@ -65,8 +66,39 @@ public class OrderJob {
                     throw new RuntimeException("商品货品库存增加失败");
                 }
             }
+            //账户余额退回
+            BigDecimal balancePrice = order.getBalancePrice();
+            if(balancePrice.compareTo(new BigDecimal(0.00)) > 0){
+                Integer userId = order.getUserId();
+                LitemallUser user = userService.findById(userId);
+                BigDecimal balance = user.getBalance();
+                balance = balance.add(balancePrice);
+
+                LitemallUser updateUser = new LitemallUser();
+                updateUser.setId(userId);
+                updateUser.setBalance(balance);
+
+                if (userService.updateById(updateUser) == 0) {
+                    throw new RuntimeException("账户余额退回失败");
+                }
+            }
+
+
+
             logger.info("订单 ID=" + order.getId() + " 已经超期自动取消订单");
         }
+
+        logger.info("系统开启任务检查会员订单是否已经超期自动取消订单");
+        List<LitemallVipOrder> litemallVipOrderList = vipOrderService.queryUnpaid(SystemConfig.getOrderUnpaid());
+        for (LitemallVipOrder order : litemallVipOrderList) {
+            // 设置订单已取消状态
+            order.setOrderStatus(OrderUtil.STATUS_AUTO_CANCEL);
+            if (vipOrderService.update(order) == 0) {
+                throw new RuntimeException("更新数据已失效");
+            }
+            logger.info("会员订单 ID=" + order.getId() + " 已经超期自动取消订单");
+        }
+
     }
 
     /**

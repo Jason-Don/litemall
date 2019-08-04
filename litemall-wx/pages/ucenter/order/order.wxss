@@ -90,9 +90,14 @@ page {
   float: left;
 }
 
-.order .h .r {
+.order .h .online {
   float: right;
-  color: #b4282d;
+  color: #67C23A;
+  font-size: 24rpx;
+}
+.order .h .offline {
+  float: right;
+  color: #409EFF;
   font-size: 24rpx;
 }
 
@@ -159,6 +164,8 @@ page {
 
 .order .b .r {
   float: right;
+  color: #b4282d;
+  font-size: 25rpx;
 }
 
 .order .b .btn {

@@ -23,6 +23,11 @@
     <result column="add_time" jdbcType="TIMESTAMP" property="addTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="deleted" jdbcType="BIT" property="deleted" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="school" jdbcType="VARCHAR" property="school" />
+    <result column="grade" jdbcType="VARCHAR" property="grade" />
+    <result column="vip_order_id" jdbcType="INTEGER" property="vipOrderId" />
+    <result column="balance" jdbcType="DECIMAL" property="balance" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -97,7 +102,7 @@
     -->
     id, username, `password`, gender, birthday, last_login_time, last_login_ip, user_level, 
     nickname, mobile, avatar, weixin_openid, session_key, `status`, add_time, update_time, 
-    deleted
+    deleted, `name`, school, grade, vip_order_id, balance
   </sql>
   <select id="selectByExample" parameterType="org.linlinjava.litemall.db.domain.LitemallUserExample" resultMap="BaseResultMap">
     <!--
@@ -223,13 +228,17 @@
       user_level, nickname, mobile, 
       avatar, weixin_openid, session_key, 
       `status`, add_time, update_time, 
-      deleted)
+      deleted, `name`, school, 
+      grade, vip_order_id, balance
+      )
     values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{gender,jdbcType=TINYINT}, 
       #{birthday,jdbcType=DATE}, #{lastLoginTime,jdbcType=TIMESTAMP}, #{lastLoginIp,jdbcType=VARCHAR}, 
       #{userLevel,jdbcType=TINYINT}, #{nickname,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR}, 
       #{avatar,jdbcType=VARCHAR}, #{weixinOpenid,jdbcType=VARCHAR}, #{sessionKey,jdbcType=VARCHAR}, 
       #{status,jdbcType=TINYINT}, #{addTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
-      #{deleted,jdbcType=BIT})
+      #{deleted,jdbcType=BIT}, #{name,jdbcType=VARCHAR}, #{school,jdbcType=VARCHAR}, 
+      #{grade,jdbcType=VARCHAR}, #{vipOrderId,jdbcType=INTEGER}, #{balance,jdbcType=DECIMAL}
+      )
   </insert>
   <insert id="insertSelective" parameterType="org.linlinjava.litemall.db.domain.LitemallUser">
     <!--
@@ -289,6 +298,21 @@
       <if test="deleted != null">
         deleted,
       </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="school != null">
+        school,
+      </if>
+      <if test="grade != null">
+        grade,
+      </if>
+      <if test="vipOrderId != null">
+        vip_order_id,
+      </if>
+      <if test="balance != null">
+        balance,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="username != null">
@@ -338,6 +362,21 @@
       </if>
       <if test="deleted != null">
         #{deleted,jdbcType=BIT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="school != null">
+        #{school,jdbcType=VARCHAR},
+      </if>
+      <if test="grade != null">
+        #{grade,jdbcType=VARCHAR},
+      </if>
+      <if test="vipOrderId != null">
+        #{vipOrderId,jdbcType=INTEGER},
+      </if>
+      <if test="balance != null">
+        #{balance,jdbcType=DECIMAL},
       </if>
     </trim>
   </insert>
@@ -409,6 +448,21 @@
       <if test="record.deleted != null">
         deleted = #{record.deleted,jdbcType=BIT},
       </if>
+      <if test="record.name != null">
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.school != null">
+        school = #{record.school,jdbcType=VARCHAR},
+      </if>
+      <if test="record.grade != null">
+        grade = #{record.grade,jdbcType=VARCHAR},
+      </if>
+      <if test="record.vipOrderId != null">
+        vip_order_id = #{record.vipOrderId,jdbcType=INTEGER},
+      </if>
+      <if test="record.balance != null">
+        balance = #{record.balance,jdbcType=DECIMAL},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -436,7 +490,12 @@
       `status` = #{record.status,jdbcType=TINYINT},
       add_time = #{record.addTime,jdbcType=TIMESTAMP},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP},
-      deleted = #{record.deleted,jdbcType=BIT}
+      deleted = #{record.deleted,jdbcType=BIT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      school = #{record.school,jdbcType=VARCHAR},
+      grade = #{record.grade,jdbcType=VARCHAR},
+      vip_order_id = #{record.vipOrderId,jdbcType=INTEGER},
+      balance = #{record.balance,jdbcType=DECIMAL}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -496,6 +555,21 @@
       <if test="deleted != null">
         deleted = #{deleted,jdbcType=BIT},
       </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="school != null">
+        school = #{school,jdbcType=VARCHAR},
+      </if>
+      <if test="grade != null">
+        grade = #{grade,jdbcType=VARCHAR},
+      </if>
+      <if test="vipOrderId != null">
+        vip_order_id = #{vipOrderId,jdbcType=INTEGER},
+      </if>
+      <if test="balance != null">
+        balance = #{balance,jdbcType=DECIMAL},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -520,7 +594,12 @@
       `status` = #{status,jdbcType=TINYINT},
       add_time = #{addTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      deleted = #{deleted,jdbcType=BIT}
+      deleted = #{deleted,jdbcType=BIT},
+      `name` = #{name,jdbcType=VARCHAR},
+      school = #{school,jdbcType=VARCHAR},
+      grade = #{grade,jdbcType=VARCHAR},
+      vip_order_id = #{vipOrderId,jdbcType=INTEGER},
+      balance = #{balance,jdbcType=DECIMAL}
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectOneByExample" parameterType="org.linlinjava.litemall.db.domain.LitemallUserExample" resultMap="BaseResultMap">

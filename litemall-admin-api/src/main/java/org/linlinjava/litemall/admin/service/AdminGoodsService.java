@@ -45,9 +45,10 @@ public class AdminGoodsService {
     @Autowired
     private QCodeService qCodeService;
 
-    public Object list(String goodsSn, String name,
+    public Object list(Integer id, String name,Integer brandId,
                        Integer page, Integer limit, String sort, String order) {
-        List<LitemallGoods> goodsList = goodsService.querySelective(goodsSn, name, page, limit, sort, order);
+        List<LitemallGoods> goodsList = goodsService.querySelective(id, name, brandId, page, limit, sort, order);
+
         return ResponseUtil.okList(goodsList);
     }
 
@@ -57,10 +58,10 @@ public class AdminGoodsService {
         if (StringUtils.isEmpty(name)) {
             return ResponseUtil.badArgument();
         }
-        String goodsSn = goods.getGoodsSn();
-        if (StringUtils.isEmpty(goodsSn)) {
-            return ResponseUtil.badArgument();
-        }
+//        String goodsSn = goods.getGoodsSn();
+//        if (StringUtils.isEmpty(goodsSn)) {
+//            return ResponseUtil.badArgument();
+//        }
         // 品牌商可以不设置，如果设置则需要验证品牌商存在
         Integer brandId = goods.getBrandId();
         if (brandId != null && brandId != 0) {
@@ -180,6 +181,7 @@ public class AdminGoodsService {
         // 商品货品表litemall_product
         for (LitemallGoodsProduct product : products) {
             product.setGoodsId(goods.getId());
+            product.setPrice(goods.getRetailPrice());//与goods现价格一致
             productService.add(product);
         }
 
@@ -245,6 +247,7 @@ public class AdminGoodsService {
         // 商品货品表litemall_product
         for (LitemallGoodsProduct product : products) {
             product.setGoodsId(goods.getId());
+            product.setPrice(goods.getRetailPrice());//与goods现价格一致
             productService.add(product);
         }
         return ResponseUtil.ok();
@@ -288,6 +291,9 @@ public class AdminGoodsService {
         Map<String, Object> data = new HashMap<>();
         data.put("categoryList", categoryList);
         data.put("brandList", brandList);
+        brandList.forEach(map -> {
+            map.put("children",null);
+        });
         return ResponseUtil.ok(data);
     }
 

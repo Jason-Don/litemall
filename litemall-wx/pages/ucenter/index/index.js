@@ -7,7 +7,11 @@ Page({
   data: {
     userInfo: {
       nickName: '点击登录',
-      avatarUrl: 'http://yanxuan.nosdn.127.net/8945ae63d940cc42406c3f67019c5cb6.png'
+      avatarUrl: 'https://yanxuan.nosdn.127.net/8945ae63d940cc42406c3f67019c5cb6.png'
+    },
+    vipInfo:{
+        name: '普通会员',
+        balance: 0.00
     },
     order: {
       unpaid: 0,
@@ -37,7 +41,8 @@ Page({
       util.request(api.UserIndex).then(function(res) {
         if (res.errno === 0) {
           that.setData({
-            order: res.data.order
+            order: res.data.order,
+            vipInfo: res.data.vipInfo
           });
         }
       });
@@ -189,6 +194,11 @@ Page({
       }
     });
   },
+  goVip: function() {
+    wx.navigateTo({
+      url: '/pages/ucenter/vip/vip'
+    });
+  },
   goAfterSale: function() {
     wx.showToast({
       title: '目前不支持',
@@ -199,6 +209,11 @@ Page({
   aboutUs: function() {
     wx.navigateTo({
       url: '/pages/about/about'
+    });
+  },
+  goUserInfo: function () {
+    wx.navigateTo({
+      url: '/pages/auth/register/register'
     });
   },
   goHelp: function () {

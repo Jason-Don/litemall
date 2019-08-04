@@ -34,12 +34,13 @@ public class WxOrderController {
      */
     @GetMapping("list")
     public Object list(@LoginUser Integer userId,
+                       @RequestParam(defaultValue = "false" ) boolean isVerifyTime,
                        @RequestParam(defaultValue = "0") Integer showType,
                        @RequestParam(defaultValue = "1") Integer page,
                        @RequestParam(defaultValue = "10") Integer limit,
                        @Sort @RequestParam(defaultValue = "add_time") String sort,
                        @Order @RequestParam(defaultValue = "desc") String order) {
-        return wxOrderService.list(userId, showType, page, limit, sort, order);
+        return wxOrderService.list(userId,isVerifyTime, showType, page, limit, sort, order);
     }
 
     /**
