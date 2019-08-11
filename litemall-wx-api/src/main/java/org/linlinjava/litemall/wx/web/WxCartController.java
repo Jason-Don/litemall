@@ -8,6 +8,7 @@ import org.linlinjava.litemall.core.util.JacksonUtil;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.db.domain.*;
 import org.linlinjava.litemall.db.service.*;
+import org.linlinjava.litemall.db.util.VipOrderUtil;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -47,6 +48,11 @@ public class WxCartController {
     private LitemallCouponUserService couponUserService;
     @Autowired
     private CouponVerifyService couponVerifyService;
+
+    @Autowired
+    private LitemallUserService userService;
+    @Autowired
+    private LitemallVipOrderService vipOrderService;
 
     /**
      * 用户购物车信息
@@ -494,11 +500,50 @@ public class WxCartController {
         // 可以使用的其他钱，例如用户积分
         BigDecimal integralPrice = new BigDecimal(0.00);
 
+        BigDecimal discount = new BigDecimal(1.00);
+        //是否有会员折扣
+        LitemallUser user = userService.findById(userId);
+        Integer vipOrderId = user.getVipOrderId();
+        if(null!=vipOrderId && 0!=vipOrderId){
+            LitemallVipOrder vipOrder = vipOrderService.findById(vipOrderId);
+            if(null!=vipOrder){
+                long between = VipOrderUtil.checkVaild(vipOrder);
+                if(between>=0){//有效
+                    discount = vipOrder.getDiscount();
+                }
+            }
+        }
+
         // 订单费用
 //        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).subtract(couponPrice).max(new BigDecimal(0.00));
-        BigDecimal orderTotalPrice = checkedGoodsPrice.subtract(couponPrice).max(new BigDecimal(0.00));
+//        BigDecimal orderTotalPrice = checkedGoodsPrice.subtract(couponPrice).max(new BigDecimal(0.00));
+        BigDecimal orderTotalPrice = checkedGoodsPrice.multiply(discount)
+                .subtract(couponPrice).max(new BigDecimal(0.00));
 
         BigDecimal actualPrice = orderTotalPrice.subtract(integralPrice);
+
+        //用户余额
+        BigDecimal balance = user.getBalance();
+        //余额减免
+        BigDecimal balancePrice = new BigDecimal(0.00);
+        BigDecimal afterPayBalance = new BigDecimal(0.00);
+        if(balance.compareTo(new BigDecimal(0.00))==1){//余额大于0.00元
+
+            if(balance.compareTo(actualPrice)==-1){//余额小于实付款
+                actualPrice = actualPrice.subtract(balance);
+                //余额全花光了
+                balancePrice = balance;
+            }else if(balance.compareTo(actualPrice)==0){//余额等于实付款
+                actualPrice = new BigDecimal(0.00);
+                //余额全花光了
+                balancePrice = balance;
+            } else if(balance.compareTo(actualPrice)==1){//余额比实付款多
+                balancePrice = actualPrice;
+                //还有余额
+                afterPayBalance = balance.subtract(actualPrice);
+                actualPrice = new BigDecimal(0.00);
+            }
+        }
 
         Map<String, Object> data = new HashMap<>();
 //        data.put("addressId", addressId);
@@ -514,6 +559,12 @@ public class WxCartController {
         data.put("orderTotalPrice", orderTotalPrice);
         data.put("actualPrice", actualPrice);
         data.put("checkedGoodsList", checkedGoodsList);
+
+        data.put("discount",discount);
+        data.put("balance",balance);
+        data.put("balancePrice",balancePrice);
+        data.put("afterPayBalance",afterPayBalance);
+
         return ResponseUtil.ok(data);
     }
 }

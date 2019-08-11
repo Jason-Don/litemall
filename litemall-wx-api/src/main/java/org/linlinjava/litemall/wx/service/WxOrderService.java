@@ -335,6 +335,9 @@ public class WxOrderService {
 //            freightPrice = SystemConfig.getFreight();
 //        }
 
+        // 可以使用的其他钱，例如用户积分
+        BigDecimal integralPrice = new BigDecimal(0.00);
+
         BigDecimal discount = new BigDecimal(1.00);
         //是否有会员折扣
         LitemallUser user = userService.findById(userId);
@@ -349,8 +352,6 @@ public class WxOrderService {
             }
         }
 
-        // 可以使用的其他钱，例如用户积分
-        BigDecimal integralPrice = new BigDecimal(0.00);
 
         // 订单费用
 //        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).subtract(couponPrice).max(new BigDecimal(0.00));

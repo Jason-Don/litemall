@@ -1,13 +1,13 @@
 // 以下是业务服务器API地址
 // 本机开发时使用
-// var WxApiRoot = 'http://localhost:80/wx/';
+var WxApiRoot = 'http://localhost:80/wx/';
 // 局域网测试使用
 // var WxApiRoot = 'http://192.168.1.117:8080/wx/';
 // var WxApiRoot = 'http://172.20.10.5:80/wx/';
 // 云平台部署时使用
 // var WxApiRoot = 'http://47.105.214.224:80/wx/';
 // 云平台上线时使用
-var WxApiRoot = 'https://www.123kt.net/wx/';
+// var WxApiRoot = 'https://www.123kt.net/wx/';
 
 module.exports = {
   IndexUrl: WxApiRoot + 'home/index', //首页数据接口

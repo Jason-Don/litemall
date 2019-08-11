@@ -20,8 +20,8 @@ public class Application extends SpringBootServletInitializer {
     }
 
     //war包指定主类
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        return builder.sources(Application.class);
-    }
+//    @Override
+//    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+//        return builder.sources(Application.class);
+//    }
 }

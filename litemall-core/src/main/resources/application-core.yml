@@ -5,9 +5,9 @@ litemall:
 #    app-secret: 2e892a8c879681286982f60264614ecb
     app-id: wx8b24d647e23aecc0
     app-secret: 748d32fbc666be6a7b6284ea0b56df68
-    mch-id: 111111
-    mch-key: xxxxxx
-    notify-url: http://www.example.com/wx/order/pay-notify
+    mch-id: 1549278921
+    mch-key: yufengjiaoyu1314
+    notify-url: https://www.123kt.net/wx/order/pay-notify-goback
     # 商户证书文件路径
     # 请参考“商户证书”一节 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_3
     key-path: xxxxx

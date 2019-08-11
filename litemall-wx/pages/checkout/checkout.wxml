@@ -64,6 +64,16 @@
         <text class="txt">￥{{freightPrice}}元</text>
       </view>
     </view> -->
+
+    <view class="order-item no-border">
+      <view class="l">
+        <text class="name">会员折扣</text>
+      </view>
+      <view class="r">
+        <text class="txt">*{{discount}}</text>
+      </view>
+    </view>
+    
     <view class="order-item no-border">
       <view class="l">
         <text class="name">优惠券</text>
@@ -72,7 +82,35 @@
         <text class="txt">-￥{{couponPrice}}元</text>
       </view>
     </view>
+
+    <view class="order-item no-border">
+      <view class="l">
+        <text class="name">账户可用余额</text>
+      </view>
+      <view class="r">
+        <text class="txt">￥{{balance}}元</text>
+      </view>
+    </view>
+
+    <view class="order-item no-border">
+      <view class="l">
+        <text class="name">账户余额抵扣</text>
+      </view>
+      <view class="r">
+        <text class="txt">-￥{{balancePrice}}元</text>
+      </view>
+    </view>
+
+    <view class="order-item no-border">
+      <view class="l">
+        <text class="name">抵扣后账户余额</text>
+      </view>
+      <view class="r">
+        <text class="txt">￥{{afterPayBalance}}元</text>
+      </view>
+    </view>
   </view>
+  
 
   <view class="goods-items">
     <view class="item" wx:for="{{checkedGoodsList}}" wx:key="id">
@@ -93,6 +131,6 @@
   <view class="order-total">
     <view class="l">实付：￥{{actualPrice}}</view>
     <view class="offline" bindtap="submitOrder" data-paytype="offline">线下付款</view>
-    <view class="online"  data-paytype="online">在线付款(未开放)</view>
+    <view class="online" bindtap="submitOrder"  data-paytype="online">在线付款</view>
   </view>
 </view>
